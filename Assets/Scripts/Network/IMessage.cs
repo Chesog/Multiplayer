@@ -92,3 +92,30 @@ public class NetVector3 : IMessage<UnityEngine.Vector3>
 
     //Dictionary<Client,Dictionary<msgType,int>>
 }
+
+public class NetConsole : IMessage<String>
+{
+    private string data;
+
+    public NetConsole(string data)
+    {
+        this.data = data;
+    }
+
+    public MessageType GetMessageType() { return MessageType.Console; }
+
+    public byte[] Serialize()
+    {
+        List<byte> outData = new List<byte>();
+
+        outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        outData.AddRange(Encoding.UTF8.GetBytes(data));
+        
+        return outData.ToArray();
+    }
+
+    public string Deserialize(byte[] message)
+    {
+        return Encoding.UTF8.GetString(message);
+    }
+}

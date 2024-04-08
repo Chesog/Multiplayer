@@ -31,7 +31,9 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         {
             if (NetworkManager.Instance.isServer)
             {
-                NetworkManager.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+                //NetworkManager.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+                NetConsole temp = new NetConsole(inputMessage.text);
+                NetworkManager.Instance.Broadcast(temp.Serialize());
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
