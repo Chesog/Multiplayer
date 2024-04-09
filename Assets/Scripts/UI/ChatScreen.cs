@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
@@ -13,6 +14,24 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         this.gameObject.SetActive(false);
 
         NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+        MessageController.Instance.OnRecieveHandShakeMessage += OnRecieveHandShakeMessage;
+        MessageController.Instance.OnRecieveConsoleMessage += OnRecieveConsoleMessage;
+        MessageController.Instance.OnRecievePositionMessage += OnRecievePositionMessage;
+    }
+
+    private void OnRecieveHandShakeMessage(byte[] obj)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    private void OnRecievePositionMessage(Vector3 obj)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    private void OnRecieveConsoleMessage(string obj)
+    {
+        messages.text += obj + System.Environment.NewLine;
     }
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -21,9 +40,13 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         {
             NetworkManager.Instance.Broadcast(data);
         }
+        
+        MessageController.Instance.HandleMessage(data);
 
-        messages.text += System.Text.ASCIIEncoding.UTF8.GetString(data) + System.Environment.NewLine;
+       // messages.text += System.Text.ASCIIEncoding.UTF8.GetString(data) + System.Environment.NewLine;
     }
+    
+    
 
     void OnEndEdit(string str)
     {
@@ -38,7 +61,9 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
             }
             else
             {
-                NetworkManager.Instance.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+                NetConsole temp = new NetConsole(inputMessage.text);
+                NetworkManager.Instance.SendToServer(temp.Serialize());
+                //NetworkManager.Instance.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
             }
 
             inputMessage.ActivateInputField();

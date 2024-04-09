@@ -97,6 +97,11 @@ public class NetConsole : IMessage<String>
 {
     private string data;
 
+    public NetConsole(byte[] dataToDeserialize)
+    {
+        data = Deserialize(dataToDeserialize);
+    }
+
     public NetConsole(string data)
     {
         this.data = data;
@@ -117,5 +122,10 @@ public class NetConsole : IMessage<String>
     public string Deserialize(byte[] message)
     {
         return Encoding.UTF8.GetString(message);
+    }
+
+    public string GetData()
+    {
+        return data;
     }
 }
