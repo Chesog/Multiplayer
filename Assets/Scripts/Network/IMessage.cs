@@ -95,6 +95,7 @@ public class NetVector3 : IMessage<UnityEngine.Vector3>
 
 public class NetConsole : IMessage<String>
 {
+    private static ulong lastMsgID = 0;
     private string data;
 
     public NetConsole(byte[] dataToDeserialize)
@@ -114,6 +115,7 @@ public class NetConsole : IMessage<String>
         List<byte> outData = new List<byte>();
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        outData.AddRange(BitConverter.GetBytes(lastMsgID++));
         outData.AddRange(Encoding.UTF8.GetBytes(data));
         
         return outData.ToArray();
