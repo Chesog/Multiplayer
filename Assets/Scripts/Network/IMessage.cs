@@ -115,7 +115,8 @@ public class NetConsole : IMessage<String>
         List<byte> outData = new List<byte>();
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
-        outData.AddRange(BitConverter.GetBytes(lastMsgID++));
+        outData.AddRange(BitConverter.GetBytes(data.Length));
+        //outData.AddRange(BitConverter.GetBytes(lastMsgID++));
         outData.AddRange(Encoding.UTF8.GetBytes(data));
         
         return outData.ToArray();
@@ -123,7 +124,8 @@ public class NetConsole : IMessage<String>
 
     public string Deserialize(byte[] message)
     {
-        return Encoding.UTF8.GetString(message);
+        int stringlenght = BitConverter.ToInt32(message, 4);
+        return Encoding.UTF8.GetString(message,8,stringlenght);
     }
 
     public string GetData()

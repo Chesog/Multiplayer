@@ -32,6 +32,7 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
     private void OnRecieveConsoleMessage(string obj)
     {
         messages.text += obj + System.Environment.NewLine;
+        Debug.Log(obj);
     }
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
