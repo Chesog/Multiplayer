@@ -1,4 +1,4 @@
-﻿using System.Net;
+﻿      using System.Net;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,9 +14,6 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         this.gameObject.SetActive(false);
 
         NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-        MessageController.Instance.OnRecieveHandShakeMessage += OnRecieveHandShakeMessage;
-        MessageController.Instance.OnRecieveConsoleMessage += OnRecieveConsoleMessage;
-        MessageController.Instance.OnRecievePositionMessage += OnRecievePositionMessage;
     }
 
     private void OnRecieveHandShakeMessage(byte[] obj)

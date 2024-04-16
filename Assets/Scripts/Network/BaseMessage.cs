@@ -12,17 +12,35 @@ public enum MessageType
     Position = 1
 }
 
-public interface IMessage<T>
+public abstract class BaseMessage<PayloadType>
 {
-    public MessageType GetMessageType();
-    public byte[] Serialize();
-    public T Deserialize(byte[] message);
+    protected PayloadType data;
+
+    public static Action<PayloadType> OnDispatch;
+    
+    public abstract MessageType GetMessageType();
+    public abstract byte[] Serialize();
+    public abstract PayloadType Deserialize(byte[] message);
+    public abstract PayloadType GetData();
 }
 
-public class NetHandShake : IMessage<(long, int)>
+public abstract class BaseOrderableMessage<PayloadType> : BaseMessage<PayloadType>
+{
+    protected static ulong LastMsgID = 0;
+
+    protected ulong MsgID = 0;
+    protected static Dictionary<PayloadType, ulong> lastExecutedMsgID = new Dictionary<PayloadType, ulong>();
+    
+    protected BaseOrderableMessage(byte[] msg)
+    {
+        MsgID = BitConverter.ToUInt64(msg,4);
+    }
+}
+
+public class NetHandShake : BaseMessage<(long, int)>
 {
     (long, int) data;
-    public (long, int) Deserialize(byte[] message)
+    public override (long, int) Deserialize(byte[] message)
     {
         (long, int) outData;
 
@@ -32,12 +50,17 @@ public class NetHandShake : IMessage<(long, int)>
         return outData;
     }
 
-    public MessageType GetMessageType()
+    public override (long, int) GetData()
+    {
+        return data;
+    }
+
+    public override MessageType GetMessageType()
     {
        return MessageType.HandShake;
     }
 
-    public byte[] Serialize()
+    public override byte[] Serialize()
     {
         List<byte> outData = new List<byte>();
 
@@ -51,7 +74,7 @@ public class NetHandShake : IMessage<(long, int)>
     }
 }
 
-public class NetVector3 : IMessage<UnityEngine.Vector3>
+public class NetVector3 : BaseMessage<UnityEngine.Vector3>
 {
     private static ulong lastMsgID = 0;
     private Vector3 data;
@@ -61,7 +84,7 @@ public class NetVector3 : IMessage<UnityEngine.Vector3>
         this.data = data;
     }
 
-    public Vector3 Deserialize(byte[] message)
+    public override Vector3 Deserialize(byte[] message)
     {
         Vector3 outData;
 
@@ -72,12 +95,17 @@ public class NetVector3 : IMessage<UnityEngine.Vector3>
         return outData;
     }
 
-    public MessageType GetMessageType()
+    public override Vector3 GetData()
+    {
+        return data;
+    }
+
+    public override MessageType GetMessageType()
     {
         return MessageType.Position;
     }
 
-    public byte[] Serialize()
+    public override byte[] Serialize()
     {
         List<byte> outData = new List<byte>();
 
@@ -93,7 +121,7 @@ public class NetVector3 : IMessage<UnityEngine.Vector3>
     //Dictionary<Client,Dictionary<msgType,int>>
 }
 
-public class NetConsole : IMessage<String>
+public class NetConsole : BaseMessage<String>
 {
     private static ulong lastMsgID = 0;
     private string data;
@@ -108,9 +136,9 @@ public class NetConsole : IMessage<String>
         this.data = data;
     }
 
-    public MessageType GetMessageType() { return MessageType.Console; }
+    public override MessageType GetMessageType() { return MessageType.Console; }
 
-    public byte[] Serialize()
+    public override byte[] Serialize()
     {
         List<byte> outData = new List<byte>();
 
@@ -122,13 +150,13 @@ public class NetConsole : IMessage<String>
         return outData.ToArray();
     }
 
-    public string Deserialize(byte[] message)
+    public override string Deserialize(byte[] message)
     {
         int stringlenght = BitConverter.ToInt32(message, 4);
         return Encoding.UTF8.GetString(message,8,stringlenght);
     }
 
-    public string GetData()
+    public override string GetData()
     {
         return data;
     }
