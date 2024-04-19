@@ -33,6 +33,7 @@ public class Client
     private void OnDispatch(string obj)
     {
         Debug.Log("OnDispatch (string obj)");
+        ChatScreen.Instance.RecieveConsoleMessage(obj);
     }
 }
 

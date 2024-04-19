@@ -17,7 +17,7 @@ public abstract class BaseMessage<PayloadType>
     protected PayloadType data;
 
     public static Action<PayloadType> OnDispatch;
-    
+
     public abstract MessageType GetMessageType();
     public abstract byte[] Serialize();
     public abstract PayloadType Deserialize(byte[] message);
