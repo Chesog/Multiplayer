@@ -37,20 +37,31 @@ public abstract class BaseOrderableMessage<PayloadType> : BaseMessage<PayloadTyp
     }
 }
 
-public class NetHandShake : BaseMessage<(long, int)>
+public class NetHandShake : BaseMessage<int>
 {
-    (long, int) data;
-    public override (long, int) Deserialize(byte[] message)
+    int data;
+
+    public void SetClientID(int clientID)
     {
-        (long, int) outData;
-
-        outData.Item1 = BitConverter.ToInt64(message, 4);
-        outData.Item2 = BitConverter.ToInt32(message, 12);
-
-        return outData;
+        data = clientID;
     }
 
-    public override (long, int) GetData()
+    public NetHandShake(byte[] dataToDeserialize)
+    {
+        data = Deserialize(dataToDeserialize);
+    }
+    
+    public NetHandShake()
+    {
+        data = -7;
+    }
+
+    public override int Deserialize(byte[] message)
+    {
+        return BitConverter.ToInt32(message, 4);;
+    }
+
+    public override int GetData()
     {
         return data;
     }
@@ -66,10 +77,8 @@ public class NetHandShake : BaseMessage<(long, int)>
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 
-        outData.AddRange(BitConverter.GetBytes(data.Item1));
-        outData.AddRange(BitConverter.GetBytes(data.Item2));
-
-
+        outData.AddRange(BitConverter.GetBytes(data));
+        
         return outData.ToArray();
     }
 }

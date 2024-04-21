@@ -17,12 +17,6 @@ public class Client
         
         NetConsole.OnDispatch += OnDispatch;
         NetVector3.OnDispatch += OnDispatch;
-        NetHandShake.OnDispatch += OnDispatch;
-    }
-
-    private void OnDispatch((long, int) obj)
-    {
-        Debug.Log("OnDispatch (long, int)");
     }
 
     private void OnDispatch(Vector3 obj)
@@ -33,12 +27,27 @@ public class Client
     private void OnDispatch(string obj)
     {
         Debug.Log("OnDispatch (string obj)");
-        ChatScreen.Instance.RecieveConsoleMessage(obj);
+        ChatScreen.Instance.ReceiveConsoleMessage(obj);
     }
 }
 
 public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveData
 {
+    private void OnEnable()
+    {
+        NetHandShake.OnDispatch += OnDispatch;
+    }
+
+    private void OnDisable()
+    {
+        NetHandShake.OnDispatch -= OnDispatch;
+    }
+
+    private void OnDispatch( int obj)
+    {
+        clientId = obj;
+    }
+
     public IPAddress ipAddress
     {
         get; private set;
@@ -63,7 +72,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
 
-    int clientId = 0; // This id should be generated during first handshake
+    public int clientId = 0;
 
     public void StartServer(int port)
     {
@@ -81,22 +90,21 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
         connection = new UdpConnection(ip, port, this);
 
-        AddClient(new IPEndPoint(ip, port));
+        NetHandShake nacho = new NetHandShake();
+        SendToServer(nacho.Serialize());
     }
 
-    void AddClient(IPEndPoint ip)
+    public int AddClient(IPEndPoint ip)
     {
         if (!ipToId.ContainsKey(ip))
         {
-            Debug.Log("Adding client: " + ip.Address);
-
             int id = clientId;
             ipToId[ip] = clientId;
 
             clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
-
             clientId++;
         }
+        return ipToId[ip];
     }
 
     void RemoveClient(IPEndPoint ip)
@@ -119,6 +127,11 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     public void SendToServer(byte[] data)
     {
         connection.Send(data);
+    }
+
+    public void SendToClient(byte[] data, IPEndPoint ip)
+    {
+       connection.Send(data,ip);
     }
 
     public void Broadcast(byte[] data)

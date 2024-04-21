@@ -14,7 +14,7 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         this.gameObject.SetActive(false);
     }
 
-    public void RecieveConsoleMessage(string obj)
+    public void ReceiveConsoleMessage(string obj)
     {
         messages.text += obj + System.Environment.NewLine;
         Debug.Log(obj);
@@ -24,17 +24,14 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
     {
         if (inputMessage.text != "")
         {
+            NetConsole temp = new NetConsole(inputMessage.text);
             if (NetworkManager.Instance.isServer)
             {
-                NetConsole temp = new NetConsole(inputMessage.text);
                 NetworkManager.Instance.Broadcast(temp.Serialize());
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
-            {
-                NetConsole temp = new NetConsole(inputMessage.text);
                 NetworkManager.Instance.SendToServer(temp.Serialize());
-            }
 
             inputMessage.ActivateInputField();
             inputMessage.Select();
