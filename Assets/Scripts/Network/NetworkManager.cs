@@ -9,6 +9,8 @@ public class Client
     public int id;
     public IPEndPoint ipEndPoint;
 
+    private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
+
     public Client(IPEndPoint ipEndPoint, int id, float timeStamp)
     {
         this.timeStamp = timeStamp;
@@ -17,6 +19,12 @@ public class Client
         
         NetConsole.OnDispatch += OnDispatch;
         NetVector3.OnDispatch += OnDispatch;
+        NetHandShake.OnDispatch += OnDispatch;
+    }
+
+    private void OnDispatch(int obj)
+    {
+        this.id = obj;
     }
 
     private void OnDispatch(Vector3 obj)

@@ -4,10 +4,13 @@ using UnityEngine;
 using System;
 using System.Text;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public enum MessageType
 {
-    HandShake = -1,
+    HandShake = -3,
+    ServerToClientHS = -1,
+    ClientToServerHS = -2,
     Console = 0,
     Position = 1
 }
@@ -36,6 +39,94 @@ public abstract class BaseOrderableMessage<PayloadType> : BaseMessage<PayloadTyp
         MsgID = BitConverter.ToUInt64(msg,4);
     }
 }
+
+public struct Player
+{
+    public string playerName;
+    public int playerID;
+
+    public Player(string playerName,int playerID)
+    {
+        this.playerName = playerName;
+        this.playerID = playerID;
+    }
+}
+
+public class NetServerToClientHS : BaseMessage<Player>
+{
+    private Player data;
+    
+    public override MessageType GetMessageType()
+    {
+        return MessageType.ServerToClientHS;
+    }
+
+    public override byte[] Serialize()
+    {
+        List<byte> outData = new List<byte>();
+
+        outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        
+        BinaryFormatter bf = new BinaryFormatter();
+        using (MemoryStream ms = new MemoryStream())
+        {
+            bf.Serialize(ms, data);
+            outData.AddRange(ms.ToArray());
+        }
+        
+        
+        return outData.ToArray();
+    }
+
+    public override Player Deserialize(byte[] message)
+    {
+        MemoryStream memStream = new MemoryStream();
+        BinaryFormatter binForm = new BinaryFormatter();
+        memStream.Write(message, 4, message.Length);
+        memStream.Seek(4, SeekOrigin.Begin);
+        Player obj = (Player) binForm.Deserialize(memStream);
+
+        return obj;
+    }
+
+    public override Player GetData()
+    {
+        return data;
+    }
+}
+
+public class ClientToServerHS : BaseMessage<string>
+{
+    private string data;
+    
+    public override MessageType GetMessageType()
+    {
+        return MessageType.ClientToServerHS;
+    }
+
+    public override byte[] Serialize()
+    {
+        List<byte> outData = new List<byte>();
+
+        outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        outData.AddRange(BitConverter.GetBytes(data.Length));
+        outData.AddRange(Encoding.UTF8.GetBytes(data));
+        
+        return outData.ToArray();
+    }
+
+    public override string Deserialize(byte[] message)
+    {
+        int stringlenght = BitConverter.ToInt32(message, 4);
+        return Encoding.UTF8.GetString(message,8,stringlenght);
+    }
+
+    public override string GetData()
+    {
+        return data;
+    }
+}
+
 
 public class NetHandShake : BaseMessage<int>
 {
