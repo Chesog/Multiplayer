@@ -3,42 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 
-public class Client
-{
-    public float timeStamp;
-    public int id;
-    public IPEndPoint ipEndPoint;
-
-    private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
-
-    public Client(IPEndPoint ipEndPoint, int id, float timeStamp)
-    {
-        this.timeStamp = timeStamp;
-        this.id = id;
-        this.ipEndPoint = ipEndPoint;
-        
-        NetConsole.OnDispatch += OnDispatch;
-        NetVector3.OnDispatch += OnDispatch;
-        NetHandShake.OnDispatch += OnDispatch;
-    }
-
-    private void OnDispatch(int obj)
-    {
-        this.id = obj;
-    }
-
-    private void OnDispatch(Vector3 obj)
-    {
-        Debug.Log("OnDispatch (Vector3 obj)");
-    }
-
-    private void OnDispatch(string obj)
-    {
-        Debug.Log("OnDispatch (string obj)");
-        ChatScreen.Instance.ReceiveConsoleMessage(obj);
-    }
-}
-
 public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveData
 {
     private void OnEnable()

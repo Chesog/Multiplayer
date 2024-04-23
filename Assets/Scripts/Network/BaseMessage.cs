@@ -3,8 +3,12 @@ using System.IO;
 using UnityEngine;
 using System;
 using System.Text;
-using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
+
+// Hacer los mensajes de ping que se tiene que mandar siempre
+// El primero en mandar el mensaje es el cliente y no se vuelve a mandar hasta obtener la respuesta del servver
+// Es un tipo de mensaje unico
+
 
 public enum MessageType
 {
@@ -54,6 +58,8 @@ public struct Player
 
 public class NetServerToClientHS : BaseMessage<Player>
 {
+    public static Action<List<Player>> OnDispatch;
+    
     private Player data;
     
     public override MessageType GetMessageType()
