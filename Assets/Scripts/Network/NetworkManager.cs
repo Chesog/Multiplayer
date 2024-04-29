@@ -43,8 +43,10 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
+    public List<Player> players;
 
     public int clientId = 0;
+    public string playerName;
 
     public void StartServer(int port)
     {
@@ -53,30 +55,32 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         connection = new UdpConnection(port, this);
     }
 
-    public void StartClient(IPAddress ip, int port)
+    public void StartClient(IPAddress ip, int port,string name)
     {
         isServer = false;
 
         this.port = port;
         this.ipAddress = ip;
+        playerName = name;
 
         connection = new UdpConnection(ip, port, this);
 
-        NetHandShake nacho = new NetHandShake();
+        Player aux = new Player(name,-7);
+        NetClientToServerHS nacho = new NetClientToServerHS(aux);
         SendToServer(nacho.Serialize());
     }
 
-    public int AddClient(IPEndPoint ip)
+    public void AddClient(IPEndPoint ip,Player lean)
     {
         if (!ipToId.ContainsKey(ip))
         {
-            int id = clientId;
+            lean.playerID = clientId;
             ipToId[ip] = clientId;
 
-            clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
+            clients.Add(clientId, new Client(ip, lean.playerID, Time.realtimeSinceStartup));
+            players.Add(lean);
             clientId++;
         }
-        return ipToId[ip];
     }
 
     void RemoveClient(IPEndPoint ip)
@@ -90,8 +94,6 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     public void OnReceiveData(byte[] data, IPEndPoint ip)
     {
-        AddClient(ip);
-
         if (OnReceiveEvent != null)
             OnReceiveEvent.Invoke(data, ip);
     }

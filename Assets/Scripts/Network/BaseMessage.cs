@@ -37,31 +37,38 @@ public abstract class BaseOrderableMessage<PayloadType> : BaseMessage<PayloadTyp
 
     protected ulong MsgID = 0;
     protected static Dictionary<PayloadType, ulong> lastExecutedMsgID = new Dictionary<PayloadType, ulong>();
-    
+
     protected BaseOrderableMessage(byte[] msg)
     {
-        MsgID = BitConverter.ToUInt64(msg,4);
+        MsgID = BitConverter.ToUInt64(msg, 4);
     }
 }
 
+[Serializable]
 public struct Player
 {
     public string playerName;
     public int playerID;
 
-    public Player(string playerName,int playerID)
+    public Player(string playerName, int playerID)
     {
         this.playerName = playerName;
         this.playerID = playerID;
     }
 }
 
-public class NetServerToClientHS : BaseMessage<Player>
+public class NetServerToClientHS : BaseMessage<List<Player>>
 {
-    public static Action<List<Player>> OnDispatch;
-    
-    private Player data;
-    
+    public NetServerToClientHS(byte[] dataToDeserialize)
+    {
+        data = Deserialize(dataToDeserialize);
+    }
+
+    public NetServerToClientHS(List<Player> players)
+    {
+        data = players;
+    }
+
     public override MessageType GetMessageType()
     {
         return MessageType.ServerToClientHS;
@@ -70,41 +77,57 @@ public class NetServerToClientHS : BaseMessage<Player>
     public override byte[] Serialize()
     {
         List<byte> outData = new List<byte>();
-
+        
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        outData.AddRange(BitConverter.GetBytes(data.Count));
         
-        BinaryFormatter bf = new BinaryFormatter();
-        using (MemoryStream ms = new MemoryStream())
+        foreach (var player in data)
         {
-            bf.Serialize(ms, data);
-            outData.AddRange(ms.ToArray());
+            outData.AddRange(BitConverter.GetBytes(player.playerID));
+            outData.AddRange(BitConverter.GetBytes(player.playerName.Length));
+            outData.AddRange(Encoding.UTF8.GetBytes(player.playerName));
         }
-        
         
         return outData.ToArray();
     }
 
-    public override Player Deserialize(byte[] message)
+    public override List<Player> Deserialize(byte[] message)
     {
-        MemoryStream memStream = new MemoryStream();
-        BinaryFormatter binForm = new BinaryFormatter();
-        memStream.Write(message, 4, message.Length);
-        memStream.Seek(4, SeekOrigin.Begin);
-        Player obj = (Player) binForm.Deserialize(memStream);
+        List<Player> aux = new List<Player>();
 
-        return obj;
+        int playersAmmount = BitConverter.ToInt32(message, 4);
+        int offset = 0;
+        for (int i = 0; i < playersAmmount; i++)
+        {
+            Player temp = new Player();
+            temp.playerID = BitConverter.ToInt32(message, offset + 8);
+            int stringlength = BitConverter.ToInt32(message, offset + 12);
+            temp.playerName = Encoding.UTF8.GetString(message, offset + 16, stringlength);
+            aux.Add(temp);
+            offset += 8 + stringlength;
+        }
+        
+        return aux;
     }
 
-    public override Player GetData()
+    public override List<Player> GetData()
     {
         return data;
     }
 }
 
-public class ClientToServerHS : BaseMessage<string>
+public class NetClientToServerHS : BaseMessage<Player>
 {
-    private string data;
-    
+    public NetClientToServerHS(byte[] dataToDeserialize)
+    {
+        data = Deserialize(dataToDeserialize);
+    }
+
+    public NetClientToServerHS(Player player)
+    {
+        data = player;
+    }
+
     public override MessageType GetMessageType()
     {
         return MessageType.ClientToServerHS;
@@ -115,19 +138,24 @@ public class ClientToServerHS : BaseMessage<string>
         List<byte> outData = new List<byte>();
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
-        outData.AddRange(BitConverter.GetBytes(data.Length));
-        outData.AddRange(Encoding.UTF8.GetBytes(data));
-        
+
+        outData.AddRange(BitConverter.GetBytes(data.playerID));
+        outData.AddRange(BitConverter.GetBytes(data.playerName.Length));
+        outData.AddRange(Encoding.UTF8.GetBytes(data.playerName));
+
         return outData.ToArray();
     }
 
-    public override string Deserialize(byte[] message)
+    public override Player Deserialize(byte[] message)
     {
-        int stringlenght = BitConverter.ToInt32(message, 4);
-        return Encoding.UTF8.GetString(message,8,stringlenght);
+        Player aux = new Player();
+        aux.playerID = BitConverter.ToInt32(message, 4);
+        int stringlength = BitConverter.ToInt32(message, 8);
+        aux.playerName = Encoding.UTF8.GetString(message, 12, stringlength);
+        return aux;
     }
 
-    public override string GetData()
+    public override Player GetData()
     {
         return data;
     }
@@ -136,8 +164,6 @@ public class ClientToServerHS : BaseMessage<string>
 
 public class NetHandShake : BaseMessage<int>
 {
-    int data;
-
     public void SetClientID(int clientID)
     {
         data = clientID;
@@ -147,7 +173,7 @@ public class NetHandShake : BaseMessage<int>
     {
         data = Deserialize(dataToDeserialize);
     }
-    
+
     public NetHandShake()
     {
         data = -7;
@@ -155,7 +181,8 @@ public class NetHandShake : BaseMessage<int>
 
     public override int Deserialize(byte[] message)
     {
-        return BitConverter.ToInt32(message, 4);;
+        return BitConverter.ToInt32(message, 4);
+        ;
     }
 
     public override int GetData()
@@ -165,7 +192,7 @@ public class NetHandShake : BaseMessage<int>
 
     public override MessageType GetMessageType()
     {
-       return MessageType.HandShake;
+        return MessageType.HandShake;
     }
 
     public override byte[] Serialize()
@@ -175,7 +202,7 @@ public class NetHandShake : BaseMessage<int>
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 
         outData.AddRange(BitConverter.GetBytes(data));
-        
+
         return outData.ToArray();
     }
 }
@@ -183,7 +210,6 @@ public class NetHandShake : BaseMessage<int>
 public class NetVector3 : BaseMessage<UnityEngine.Vector3>
 {
     private static ulong lastMsgID = 0;
-    private Vector3 data;
 
     public NetVector3(Vector3 data)
     {
@@ -230,7 +256,6 @@ public class NetVector3 : BaseMessage<UnityEngine.Vector3>
 public class NetConsole : BaseMessage<String>
 {
     private static ulong lastMsgID = 0;
-    private string data;
 
     public NetConsole(byte[] dataToDeserialize)
     {
@@ -242,7 +267,10 @@ public class NetConsole : BaseMessage<String>
         this.data = data;
     }
 
-    public override MessageType GetMessageType() { return MessageType.Console; }
+    public override MessageType GetMessageType()
+    {
+        return MessageType.Console;
+    }
 
     public override byte[] Serialize()
     {
@@ -250,16 +278,15 @@ public class NetConsole : BaseMessage<String>
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
         outData.AddRange(BitConverter.GetBytes(data.Length));
-        //outData.AddRange(BitConverter.GetBytes(lastMsgID++));
         outData.AddRange(Encoding.UTF8.GetBytes(data));
-        
+
         return outData.ToArray();
     }
 
     public override string Deserialize(byte[] message)
     {
-        int stringlenght = BitConverter.ToInt32(message, 4);
-        return Encoding.UTF8.GetString(message,8,stringlenght);
+        int stringlength = BitConverter.ToInt32(message, 4);
+        return Encoding.UTF8.GetString(message, 8, stringlength);
     }
 
     public override string GetData()

@@ -7,8 +7,8 @@ public class Client
 {
     public float timeStamp;
     public int id;
-    public string name;
     public IPEndPoint ipEndPoint;
+    public Player player;
 
     private List<Player> players = new List<Player>();
 
@@ -17,7 +17,7 @@ public class Client
         this.timeStamp = timeStamp;
         this.id = id;
         this.ipEndPoint = ipEndPoint;
-        this.name = "";
+        player = new Player(" ",id);
         
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetVector3.OnDispatch += OnDispatchNetVec3;
@@ -25,12 +25,12 @@ public class Client
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
     }
     
-    public Client(IPEndPoint ipEndPoint, int id, float timeStamp,string name)
+    public Client(IPEndPoint ipEndPoint, int id, float timeStamp,Player player)
     {
         this.timeStamp = timeStamp;
         this.id = id;
         this.ipEndPoint = ipEndPoint;
-        this.name = name;
+        this.player = player;
         
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetVector3.OnDispatch += OnDispatchNetVec3;
