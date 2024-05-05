@@ -8,16 +8,29 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     private void OnEnable()
     {
         NetHandShake.OnDispatch += OnDispatch;
+        NetConsole.OnDispatch += OnDispatchNetCon;
+        NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
     }
-
     private void OnDisable()
     {
         NetHandShake.OnDispatch -= OnDispatch;
+        NetConsole.OnDispatch -= OnDispatchNetCon;
     }
 
     private void OnDispatch( int obj)
     {
         clientId = obj;
+    }
+    
+    private void OnDispatchNetCon(string obj)
+    {
+        Debug.Log("OnDispatch (string obj)");
+        ChatScreen.Instance.ReceiveConsoleMessage(obj);
+    }
+    
+    private void OnDispatchNetS2C(List<Player> obj)
+    {
+        players = obj;
     }
 
     public IPAddress ipAddress
@@ -43,7 +56,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
-    public List<Player> players;
+    private List<Player> players = new List<Player>();
 
     public int clientId = 0;
     public string playerName;
@@ -118,6 +131,8 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
             }
         }
     }
+
+    public List<Player> GetCurrentPlayers() { return players; }
 
     void Update()
     {

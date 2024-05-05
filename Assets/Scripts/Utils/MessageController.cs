@@ -28,14 +28,6 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
         
         switch (temp)
         {
-            case MessageType.HandShake:
-                //NetHandShake aux = new NetHandShake(message);
-                //if (aux.GetData() != -7)
-                //{
-                //    NetworkManager.Instance.clientId = aux.GetData();
-                //    Debug.Log("client ID = " + NetworkManager.Instance.clientId );
-                //}
-                break;
             case MessageType.Console:
                 NetConsole con = new NetConsole(message);
                 NetConsole.OnDispatch?.Invoke(con.GetData());
@@ -55,8 +47,7 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                         NetworkManager.Instance.clientId = player.playerID;
                     }
                 }
-
-                NetworkManager.Instance.players = s2c.GetData();
+                NetServerToClientHS.OnDispatch.Invoke(s2c.GetData());
                 break;
         }
     }
@@ -67,22 +58,18 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
         
         switch (temp)
         {
-            case MessageType.HandShake:
-                //NetHandShake aux = new NetHandShake();
-                //aux.SetClientID(NetworkManager.Instance.AddClient(ep));
-                //NetworkManager.Instance.SendToClient(aux.Serialize(),ep);
-                break;
             case MessageType.Console:
                 NetConsole con = new NetConsole(data);
                 NetworkManager.Instance.Broadcast(con.Serialize());
-                ChatScreen.Instance.ReceiveConsoleMessage(con.GetData());
+                NetConsole.OnDispatch?.Invoke(con.GetData());
+                //ChatScreen.Instance.ReceiveConsoleMessage(con.GetData());
                 break;
             case MessageType.Position:
                 break;
             case MessageType.ClientToServerHS:
                 NetClientToServerHS c2s = new NetClientToServerHS(data);
                 NetworkManager.Instance.AddClient(ep,c2s.GetData());
-                NetServerToClientHS s2c = new NetServerToClientHS(NetworkManager.Instance.players);
+                NetServerToClientHS s2c = new NetServerToClientHS(NetworkManager.Instance.GetCurrentPlayers());
                 NetworkManager.Instance.Broadcast(s2c.Serialize());
                 break;
         }
