@@ -29,6 +29,72 @@ public abstract class BaseMessage<PayloadType>
     public abstract byte[] Serialize();
     public abstract PayloadType Deserialize(byte[] message);
     public abstract PayloadType GetData();
+
+    public virtual void EncryptMessage(List<byte> message)
+    {
+        uint checksum1 = 0;
+        uint checksum2 = 0;
+        int messageLenght = message.Count;
+        for (int i = 0; i < messageLenght; i++)
+        {
+            int temp = message[i] % 4;
+            switch (temp)
+            {
+                case 0:
+                    checksum1 += message[i];
+                    checksum2 <<= message[i];
+                    break;
+                case 1:
+                    checksum1 -= message[i];
+                    checksum2 -= message[i];
+                    break;
+                case 2:
+                    checksum1 >>= message[i];
+                    checksum2 >>= message[i];
+                    break;
+                case 3:
+                    checksum1 <<= message[i];
+                    checksum2 += message[i];
+                    break;
+            }
+        }
+        message.AddRange(BitConverter.GetBytes(checksum1));
+        message.AddRange(BitConverter.GetBytes(checksum2));
+    }
+
+    public virtual void DecryptMessage(List<byte> message,out uint cs1,out uint cs2)
+    {
+        uint checksum1 = 0;
+        uint checksum2 = 0;
+        int messageLenght = message.Count - sizeof(uint) * 2;
+
+        for (int i = 0; i < messageLenght; i++)
+        {
+            int temp = message[i] % 4;
+            switch (temp)
+            {
+                case 0:
+                    checksum1 += message[i];
+                    checksum2 <<= message[i];
+                    break;
+                case 1:
+                    checksum1 -= message[i];
+                    checksum2 -= message[i];
+                    break;
+                case 2:
+                    checksum1 >>= message[i];
+                    checksum2 >>= message[i];
+                    break;
+                case 3:
+                    checksum1 <<= message[i];
+                    checksum2 += message[i];
+                    break;
+            }
+        }
+        
+        cs1 = checksum1;
+        cs2 = checksum2;
+    }
 }
 
 public abstract class BaseOrderableMessage<PayloadType> : BaseMessage<PayloadType>
@@ -279,6 +345,8 @@ public class NetConsole : BaseMessage<String>
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
         outData.AddRange(BitConverter.GetBytes(data.Length));
         outData.AddRange(Encoding.UTF8.GetBytes(data));
+        
+        base.EncryptMessage(outData);
 
         return outData.ToArray();
     }
