@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MessageController : MonoBehaviourSingleton<MessageController>
 {
@@ -30,10 +31,13 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
         {
             case MessageType.Console:
                 NetConsole con = new NetConsole(message);
-                con.DecryptMessage(message.ToList(), out uint cs1, out uint cs2);
-                if (cs1 == BitConverter.ToUInt32(message, message.Length - sizeof(uint) * 2))
-                    if (cs2 == BitConverter.ToUInt32(message, message.Length - sizeof(uint)))
-                        NetConsole.OnDispatch?.Invoke(con.GetData());
+                if (con.CheckMessage(message))
+                {
+                    NetConsole.OnDispatch?.Invoke(con.GetData());
+                    Debug.Log(nameof(NetConsole) + ": The message is ok");
+                }
+                else
+                    Debug.Log(nameof(NetConsole) + ": The message is corrupt");
                 break;
             case MessageType.Position:
                 //OnRecievePositionMessage?.Invoke();
@@ -63,18 +67,15 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
         switch (temp)
         {
             case MessageType.Console:
-                data[3] = 144;
-                NetConsole con = new NetConsole(data);
-                con.DecryptMessage(data.ToList(), out uint cs1, out uint cs2);
-                if (cs1 == BitConverter.ToUInt32(data, data.Length - sizeof(uint) * 2) &&
-                    cs2 == BitConverter.ToUInt32(data, data.Length - sizeof(uint)))
-                {
-                    NetworkManager.Instance.Broadcast(con.Serialize());
-                    NetConsole.OnDispatch?.Invoke(con.GetData());
-                }
-                else
-                    Debug.Log("Message Corrupted");
-
+              NetConsole con = new NetConsole(data);
+              if (con.CheckMessage(data))
+              {
+                  NetworkManager.Instance.Broadcast(con.Serialize());
+                  NetConsole.OnDispatch?.Invoke(con.GetData());
+                  Debug.Log(nameof(NetConsole) + ": The message is ok");
+              }
+              else
+                  Debug.Log(nameof(NetConsole) + ": The message is corrupt");
                 break;
             case MessageType.Position:
                 break;

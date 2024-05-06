@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -12,11 +13,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public enum MessageType
 {
-    HandShake = -3,
     ServerToClientHS = -1,
     ClientToServerHS = -2,
-    Console = 0,
-    Position = 1
+    Ping = 0,
+    Pong = 1,
+    Console = 2,
+    Position = 3
 }
 
 public abstract class BaseMessage<PayloadType>
@@ -58,11 +60,12 @@ public abstract class BaseMessage<PayloadType>
                     break;
             }
         }
+
         message.AddRange(BitConverter.GetBytes(checksum1));
         message.AddRange(BitConverter.GetBytes(checksum2));
     }
 
-    public virtual void DecryptMessage(List<byte> message,out uint cs1,out uint cs2)
+    public virtual void DecryptMessage(List<byte> message, out uint cs1, out uint cs2)
     {
         uint checksum1 = 0;
         uint checksum2 = 0;
@@ -91,9 +94,23 @@ public abstract class BaseMessage<PayloadType>
                     break;
             }
         }
-        
+
         cs1 = checksum1;
         cs2 = checksum2;
+    }
+
+    public virtual bool CheckMessage(byte[] message)
+    {
+        DecryptMessage(message.ToList(), out uint cs1, out uint cs2);
+        if (cs1 == BitConverter.ToUInt32(message, message.Length - sizeof(uint) * 2) &&
+            cs2 == BitConverter.ToUInt32(message, message.Length - sizeof(uint)))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -143,17 +160,17 @@ public class NetServerToClientHS : BaseMessage<List<Player>>
     public override byte[] Serialize()
     {
         List<byte> outData = new List<byte>();
-        
+
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
         outData.AddRange(BitConverter.GetBytes(data.Count));
-        
+
         foreach (var player in data)
         {
             outData.AddRange(BitConverter.GetBytes(player.playerID));
             outData.AddRange(BitConverter.GetBytes(player.playerName.Length));
             outData.AddRange(Encoding.UTF8.GetBytes(player.playerName));
         }
-        
+
         return outData.ToArray();
     }
 
@@ -172,7 +189,7 @@ public class NetServerToClientHS : BaseMessage<List<Player>>
             aux.Add(temp);
             offset += 8 + stringlength;
         }
-        
+
         return aux;
     }
 
@@ -227,38 +244,16 @@ public class NetClientToServerHS : BaseMessage<Player>
     }
 }
 
-
-public class NetHandShake : BaseMessage<int>
+public class NetPing : BaseMessage<object>
 {
-    public void SetClientID(int clientID)
-    {
-        data = clientID;
-    }
-
-    public NetHandShake(byte[] dataToDeserialize)
+    public NetPing(byte[] dataToDeserialize)
     {
         data = Deserialize(dataToDeserialize);
     }
 
-    public NetHandShake()
-    {
-        data = -7;
-    }
-
-    public override int Deserialize(byte[] message)
-    {
-        return BitConverter.ToInt32(message, 4);
-        ;
-    }
-
-    public override int GetData()
-    {
-        return data;
-    }
-
     public override MessageType GetMessageType()
     {
-        return MessageType.HandShake;
+        return MessageType.Ping;
     }
 
     public override byte[] Serialize()
@@ -267,9 +262,18 @@ public class NetHandShake : BaseMessage<int>
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 
-        outData.AddRange(BitConverter.GetBytes(data));
-
         return outData.ToArray();
+    }
+
+    public override object Deserialize(byte[] message)
+    {
+        object aux = BitConverter.ToInt32(message, 0);
+        return aux;
+    }
+
+    public override object GetData()
+    {
+        return data;
     }
 }
 
@@ -345,7 +349,7 @@ public class NetConsole : BaseMessage<String>
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
         outData.AddRange(BitConverter.GetBytes(data.Length));
         outData.AddRange(Encoding.UTF8.GetBytes(data));
-        
+
         base.EncryptMessage(outData);
 
         return outData.ToArray();

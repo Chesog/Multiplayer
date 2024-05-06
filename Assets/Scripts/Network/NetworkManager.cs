@@ -7,13 +7,11 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 {
     private void OnEnable()
     {
-        NetHandShake.OnDispatch += OnDispatch;
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
     }
     private void OnDisable()
     {
-        NetHandShake.OnDispatch -= OnDispatch;
         NetConsole.OnDispatch -= OnDispatchNetCon;
     }
 
