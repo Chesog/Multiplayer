@@ -38,24 +38,33 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                 }
                 else
                     Debug.Log(nameof(NetConsole) + ": The message is corrupt");
+
                 break;
             case MessageType.Position:
                 //OnRecievePositionMessage?.Invoke();
                 break;
             case MessageType.ServerToClientHS:
                 NetServerToClientHS s2c = new NetServerToClientHS(message);
-                //Chekear si mi nombre esta en la lista , si no esta volver a mandar un handshake 
-                foreach (var player in s2c.GetData())
+                if (s2c.CheckMessage(message))
                 {
-                    Debug.Log("Player Name : " + player.playerName);
-                    Debug.Log("Player ID : " + player.playerID);
-                    if (player.playerName == NetworkManager.Instance.playerName)
+                    //Chekear si mi nombre esta en la lista , si no esta volver a mandar un handshake 
+                    foreach (var player in s2c.GetData())
                     {
-                        NetworkManager.Instance.clientId = player.playerID;
+                        Debug.Log("Player Name : " + player.playerName);
+                        Debug.Log("Player ID : " + player.playerID);
+                        if (player.playerName == NetworkManager.Instance.playerName)
+                        {
+                            NetworkManager.Instance.clientId = player.playerID;
+                        }
                     }
-                }
 
-                NetServerToClientHS.OnDispatch.Invoke(s2c.GetData());
+                    NetServerToClientHS.OnDispatch.Invoke(s2c.GetData());
+                    Debug.Log(nameof(NetServerToClientHS) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(NetServerToClientHS) + ": The message is corrupt");
+                }
                 break;
         }
     }
@@ -67,23 +76,32 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
         switch (temp)
         {
             case MessageType.Console:
-              NetConsole con = new NetConsole(data);
-              if (con.CheckMessage(data))
-              {
-                  NetworkManager.Instance.Broadcast(con.Serialize());
-                  NetConsole.OnDispatch?.Invoke(con.GetData());
-                  Debug.Log(nameof(NetConsole) + ": The message is ok");
-              }
-              else
-                  Debug.Log(nameof(NetConsole) + ": The message is corrupt");
+                NetConsole con = new NetConsole(data);
+                if (con.CheckMessage(data))
+                {
+                    NetworkManager.Instance.Broadcast(con.Serialize());
+                    NetConsole.OnDispatch?.Invoke(con.GetData());
+                    Debug.Log(nameof(NetConsole) + ": The message is ok");
+                }
+                else
+                    Debug.Log(nameof(NetConsole) + ": The message is corrupt");
+
                 break;
             case MessageType.Position:
                 break;
             case MessageType.ClientToServerHS:
                 NetClientToServerHS c2s = new NetClientToServerHS(data);
-                NetworkManager.Instance.AddClient(ep, c2s.GetData());
-                NetServerToClientHS s2c = new NetServerToClientHS(NetworkManager.Instance.GetCurrentPlayers());
-                NetworkManager.Instance.Broadcast(s2c.Serialize());
+                if (c2s.CheckMessage(data))
+                {
+                    NetworkManager.Instance.AddClient(ep, c2s.GetData());
+                    NetServerToClientHS s2c = new NetServerToClientHS(NetworkManager.Instance.GetCurrentPlayers());
+                    NetworkManager.Instance.Broadcast(s2c.Serialize());
+                    Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
+                }
                 break;
         }
     }

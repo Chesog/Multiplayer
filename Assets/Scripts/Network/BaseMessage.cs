@@ -170,6 +170,8 @@ public class NetServerToClientHS : BaseMessage<List<Player>>
             outData.AddRange(BitConverter.GetBytes(player.playerName.Length));
             outData.AddRange(Encoding.UTF8.GetBytes(player.playerName));
         }
+        
+        base.EncryptMessage(outData);
 
         return outData.ToArray();
     }
@@ -225,6 +227,8 @@ public class NetClientToServerHS : BaseMessage<Player>
         outData.AddRange(BitConverter.GetBytes(data.playerID));
         outData.AddRange(BitConverter.GetBytes(data.playerName.Length));
         outData.AddRange(Encoding.UTF8.GetBytes(data.playerName));
+        
+        base.EncryptMessage(outData);
 
         return outData.ToArray();
     }
@@ -261,6 +265,8 @@ public class NetPing : BaseMessage<object>
         List<byte> outData = new List<byte>();
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        
+        base.EncryptMessage(outData);
 
         return outData.ToArray();
     }
@@ -316,6 +322,8 @@ public class NetVector3 : BaseMessage<UnityEngine.Vector3>
         outData.AddRange(BitConverter.GetBytes(data.x));
         outData.AddRange(BitConverter.GetBytes(data.y));
         outData.AddRange(BitConverter.GetBytes(data.z));
+        
+        base.EncryptMessage(outData);
 
         return outData.ToArray();
     }
