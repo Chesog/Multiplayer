@@ -1,6 +1,6 @@
 Desconecxion (Por que quiero y por time out)
 Representacion de pj con movimiento
-ping
+ping // Medio hechjur
 Mensajes Ordanables 
 Mensajes de obligatorios
 kick

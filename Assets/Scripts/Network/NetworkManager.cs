@@ -168,5 +168,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         // Flush the data in main thread
         if (connection != null)
             connection.FlushReceiveData();
+        
+        
     }
 }
