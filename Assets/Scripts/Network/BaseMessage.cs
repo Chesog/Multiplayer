@@ -16,9 +16,8 @@ public enum MessageType
     ServerToClientHS = -1,
     ClientToServerHS = -2,
     Ping = 0,
-    Pong = 1,
-    Console = 2,
-    Position = 3
+    Console = 1,
+    Position = 2
 }
 
 public abstract class BaseMessage<PayloadType>
@@ -250,9 +249,9 @@ public class NetClientToServerHS : BaseMessage<Player>
 
 public class NetPing : BaseMessage<object>
 {
-    public NetPing(byte[] dataToDeserialize)
+    public NetPing()
     {
-        data = Deserialize(dataToDeserialize);
+        data = GetMessageType();
     }
 
     public override MessageType GetMessageType()

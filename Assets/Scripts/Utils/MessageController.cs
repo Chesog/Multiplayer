@@ -66,6 +66,27 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                     Debug.Log(nameof(NetServerToClientHS) + ": The message is corrupt");
                 }
                 break;
+            case MessageType.Ping:
+                NetPing ping = new NetPing();
+                if (ping.CheckMessage(message))
+                {
+                    if (!NetworkManager.Instance.CheckTimeDiference(DateTime.UtcNow))
+                    {
+                        NetworkManager.Instance.SetLastRecivedPingTime(DateTime.UtcNow);
+                        NetworkManager.Instance.SendToServer(ping.Serialize());
+                    }
+                    else
+                    {
+                        //NetworkManager.Instance.RemoveClient(ep);
+                    }
+                    Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
+                }
+               
+                break;
         }
     }
 
@@ -102,6 +123,27 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                 {
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
                 }
+                break;
+            case MessageType.Ping:
+                NetPing ping = new NetPing();
+                if (ping.CheckMessage(data))
+                {
+                    if (!NetworkManager.Instance.CheckTimeDiference(DateTime.UtcNow))
+                    {
+                        NetworkManager.Instance.SetLastRecivedPingTime(DateTime.UtcNow);
+                        NetworkManager.Instance.SendToClient(ping.Serialize(),ep);
+                    }
+                    else
+                    {
+                       // NetworkManager.Instance.RemoveClient(ep);
+                    }
+                    Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
+                }
+               
                 break;
         }
     }

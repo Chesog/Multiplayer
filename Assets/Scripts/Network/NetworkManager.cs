@@ -46,7 +46,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         get; private set;
     }
 
-    public int TimeOut = 30;
+    public int TimeOut = 5;
 
     public Action<byte[], IPEndPoint> OnReceiveEvent;
 
@@ -58,6 +58,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     public int clientId = 0;
     public string playerName;
+    private DateTime lastTimeReceivedPing = DateTime.UtcNow;
 
     public void StartServer(int port)
     {
@@ -79,6 +80,9 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         Player aux = new Player(name,-7);
         NetClientToServerHS nacho = new NetClientToServerHS(aux);
         SendToServer(nacho.Serialize());
+
+        NetPing ping = new NetPing();
+        SendToServer(ping.Serialize());
     }
 
     public void AddClient(IPEndPoint ip,Player lean)
@@ -94,13 +98,28 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         }
     }
 
-    void RemoveClient(IPEndPoint ip)
+    public void RemoveClient(IPEndPoint ip)
     {
         if (ipToId.ContainsKey(ip))
         {
             Debug.Log("Removing client: " + ip.Address);
             clients.Remove(ipToId[ip]);
+            RemovePlayer(ipToId[ip]);
         }
+    }
+
+    private void RemovePlayer(int id)
+    {
+        Player aux = new Player();
+        foreach (var player in players)
+        {
+            if (player.playerID == id)
+                aux = player;
+        }
+
+        if (players.Contains(aux))
+            players.Remove(aux);
+
     }
 
     public void OnReceiveData(byte[] data, IPEndPoint ip)
@@ -131,6 +150,18 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     }
 
     public List<Player> GetCurrentPlayers() { return players; }
+
+    public void SetLastRecivedPingTime(DateTime currentTime) { lastTimeReceivedPing = currentTime; }
+
+    public bool CheckTimeDiference(DateTime currentTime)
+    {
+        float diference = currentTime.Second - lastTimeReceivedPing.Second;
+        if (diference > TimeOut)
+        {
+            return true;
+        }
+        return false;
+    }
 
     void Update()
     {
