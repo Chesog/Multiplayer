@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using System;
 using System.Linq;
 using System.Text;
-using System.Runtime.Serialization.Formatters.Binary;
 
 // Hacer los mensajes de ping que se tiene que mandar siempre
 // El primero en mandar el mensaje es el cliente y no se vuelve a mandar hasta obtener la respuesta del servver

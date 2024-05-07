@@ -14,12 +14,6 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     {
         NetConsole.OnDispatch -= OnDispatchNetCon;
     }
-
-    private void OnDispatch( int obj)
-    {
-        clientId = obj;
-    }
-    
     private void OnDispatchNetCon(string obj)
     {
         Debug.Log("OnDispatch (string obj)");
