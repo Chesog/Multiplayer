@@ -7,41 +7,45 @@ using UnityEngine;
 public class NetworkManagerClient : NetworkManager
 {
     public int clientId = 0; //  cliente
-    public string playerName;//  cliente
-    
-    private void OnEnable()
+    public string playerName; //  cliente
+
+    private void Awake()
     {
-        _serviceLocator.Register<NetworkManagerClient>(GetType(),this);
+        _serviceLocator = ServiceLocator.Global;
+
+        _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
+
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
     }
+
     private void OnDisable()
     {
         NetConsole.OnDispatch -= OnDispatchNetCon;
         NetServerToClientHS.OnDispatch -= OnDispatchNetS2C;
     }
-    public void StartClient(IPAddress ip, int port,string name) // cliente pero con mensaje para el servidor
-    {
 
+    public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
+    {
         this.port = port;
         this.ipAddress = ip;
         playerName = name;
 
         connection = new UdpConnection(ip, port, this);
 
-        Player aux = new Player(name,-7);
+        Player aux = new Player(name, -7);
         NetClientToServerHS nacho = new NetClientToServerHS(aux);
         SendToServer(nacho.Serialize());
 
         NetPing ping = new NetPing();
         SendToServer(ping.Serialize());
     }
-    
+
     public void SendToServer(byte[] data)
     {
         connection.Send(data);
     }
-    
+
     protected void OnDispatchNetS2C(List<Player> obj)
     {
         players = obj;
@@ -93,6 +97,7 @@ public class NetworkManagerClient : NetworkManager
                 {
                     Debug.Log(nameof(NetServerToClientHS) + ": The message is corrupt");
                 }
+
                 break;
             case MessageType.Ping:
                 NetPing ping = new NetPing();
@@ -107,15 +112,15 @@ public class NetworkManagerClient : NetworkManager
                     {
                         //NetworkManager.Instance.RemoveClient(ep);
                     }
+
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
                 }
                 else
                 {
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
                 }
-               
+
                 break;
         }
     }
-
 }

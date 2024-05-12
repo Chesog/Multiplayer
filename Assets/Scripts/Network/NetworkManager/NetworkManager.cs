@@ -6,10 +6,6 @@ using UnityEngine;
 public class NetworkManager : MonoBehaviour , IReceiveData
 {
     protected ServiceLocator _serviceLocator;
-    private void Awake()
-    {
-        _serviceLocator = ServiceLocator.global;
-    }
     
     protected void OnDispatchNetCon(string obj)
     {

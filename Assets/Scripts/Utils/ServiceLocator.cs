@@ -7,9 +7,9 @@ using UnityEditor;
 
 public class ServiceLocator : MonoBehaviour
 {
-    public static ServiceLocator global;
-    public static Dictionary<Scene, ServiceLocator> sceneContainers;
-    public static List<GameObject> TmpSceneGameObjects;
+    private static ServiceLocator global;
+    private static Dictionary<Scene, ServiceLocator> sceneContainers;
+    private static List<GameObject> TmpSceneGameObjects;
 
     private readonly ServiceManager services = new ServiceManager();
     private const string const_globalServiceLocatorName = "ServiceLocator [Global]";

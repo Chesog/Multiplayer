@@ -8,30 +8,33 @@ public class NetworkManagerServer : NetworkManager
 {
     private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>(); // servidor 
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>(); // servidor
-    
+
     private int clientId;
-    
-    private void OnEnable()
+
+    private void Awake()
     {
+        _serviceLocator = ServiceLocator.Global;
+
         _serviceLocator.Register<NetworkManagerServer>(GetType(), this);
+
         NetConsole.OnDispatch += OnDispatchNetCon;
     }
+
     private void OnDisable()
     {
         NetConsole.OnDispatch -= OnDispatchNetCon;
     }
-    
+
     public void StartServer(int port)
     {
         this.port = port;
         connection = new UdpConnection(port, this);
     }
-    
-    public void AddClient(IPEndPoint ip,Player lean) // servidor 
+
+    public void AddClient(IPEndPoint ip, Player lean) // servidor 
     {
         if (!ipToId.ContainsKey(ip))
         {
-          
             lean.playerID = clientId;
             ipToId[ip] = clientId;
 
@@ -40,7 +43,7 @@ public class NetworkManagerServer : NetworkManager
             clientId++;
         }
     }
-    
+
     public void RemoveClient(IPEndPoint ip) // servidor 
     {
         if (ipToId.ContainsKey(ip))
@@ -50,10 +53,10 @@ public class NetworkManagerServer : NetworkManager
             RemovePlayer(ipToId[ip]);
         }
     }
-    
+
     public void SendToClient(byte[] data, IPEndPoint ip)
     {
-        connection.Send(data,ip);
+        connection.Send(data, ip);
     }
 
     public void Broadcast(byte[] data)
@@ -66,13 +69,13 @@ public class NetworkManagerServer : NetworkManager
             }
         }
     }
-    
+
     public override void OnReceiveData(byte[] data, IPEndPoint ip)
     {
-        HandleServerMessage(data,ip);
+        HandleServerMessage(data, ip);
     }
-    
-      public void HandleServerMessage(byte[] data, IPEndPoint ep)
+
+    public void HandleServerMessage(byte[] data, IPEndPoint ep)
     {
         MessageType temp = (MessageType)BitConverter.ToInt32(data, 0);
 
@@ -105,6 +108,7 @@ public class NetworkManagerServer : NetworkManager
                 {
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
                 }
+
                 break;
             case MessageType.Ping:
                 NetPing ping = new NetPing();
@@ -113,19 +117,20 @@ public class NetworkManagerServer : NetworkManager
                     if (!CheckTimeDiference(DateTime.UtcNow))
                     {
                         SetLastRecivedPingTime(DateTime.UtcNow);
-                        SendToClient(ping.Serialize(),ep);
+                        SendToClient(ping.Serialize(), ep);
                     }
                     else
                     {
-                       // NetworkManager.Instance.RemoveClient(ep);
+                        // NetworkManager.Instance.RemoveClient(ep);
                     }
+
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
                 }
                 else
                 {
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
                 }
-               
+
                 break;
         }
     }

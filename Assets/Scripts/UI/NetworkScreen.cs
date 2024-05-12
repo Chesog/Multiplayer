@@ -17,9 +17,9 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     private NetworkManagerServer _networkServer;
     private NetworkManagerClient _networkClient;
 
-    protected void Awake()
+    protected void Start()
     {
-        _serviceLocator = ServiceLocator.global;
+        _serviceLocator = ServiceLocator.Global;
         _serviceLocator.Get(out NetworkManagerServer server);
         _networkServer = server;
         

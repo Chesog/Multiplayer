@@ -8,14 +8,19 @@ public class ChatScreen : MonoBehaviour
     public InputField inputMessage;
     
     private ServiceLocator _serviceLocator;
-    private NetworkManager _networkManager;
+    private NetworkManagerServer _networkManagerServer;
+    private NetworkManagerClient _networkManagerClient;
 
-    protected void Awake()
+    protected void Start()
     {
-        _serviceLocator = ServiceLocator.global;
+        _serviceLocator = ServiceLocator.Global;
         _serviceLocator.Register<ChatScreen>(GetType(), this);
-        _serviceLocator.Get(out NetworkManager manager);
-        _networkManager = manager;
+        
+        _serviceLocator.Get(out NetworkManagerServer server);
+        _networkManagerServer = server;
+        
+        _serviceLocator.Get(out NetworkManagerClient clietn);
+        _networkManagerClient = clietn;
         
         inputMessage.onEndEdit.AddListener(OnEndEdit);
 
@@ -33,13 +38,13 @@ public class ChatScreen : MonoBehaviour
         if (inputMessage.text != "")
         {
             NetConsole temp = new NetConsole(inputMessage.text);
-            if (_networkManager.isServer)
+            if (_networkManagerServer)
             {
-                _networkManager.Broadcast(temp.Serialize());
+                _networkManagerServer.Broadcast(temp.Serialize());
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
-                _networkManager.SendToServer(temp.Serialize());
+                _networkManagerClient.SendToServer(temp.Serialize());
 
             inputMessage.ActivateInputField();
             inputMessage.Select();
