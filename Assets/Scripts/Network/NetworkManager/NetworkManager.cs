@@ -3,8 +3,15 @@ using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 
-public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveData
+public class NetworkManager : MonoBehaviour , IReceiveData
 {
+    private ServiceLocator _serviceLocator;
+    private void Awake()
+    {
+        _serviceLocator = ServiceLocator.global;
+        _serviceLocator.Register<NetworkManager>(GetType(), this);
+    }
+
     private void OnEnable()
     {
         NetConsole.OnDispatch += OnDispatchNetCon;
@@ -17,7 +24,8 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     private void OnDispatchNetCon(string obj)
     {
         Debug.Log("OnDispatch (string obj)");
-        ChatScreen.Instance.ReceiveConsoleMessage(obj);
+        _serviceLocator.Get(out ChatScreen chatScreen);
+        chatScreen.ReceiveConsoleMessage(obj);
     }
     
     private void OnDispatchNetS2C(List<Player> obj)

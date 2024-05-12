@@ -2,13 +2,21 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
+public class ChatScreen : MonoBehaviour
 {
     public Text messages;
     public InputField inputMessage;
+    
+    private ServiceLocator _serviceLocator;
+    private NetworkManager _networkManager;
 
-    protected override void Initialize()
+    protected void Awake()
     {
+        _serviceLocator = ServiceLocator.global;
+        _serviceLocator.Register<ChatScreen>(GetType(), this);
+        _serviceLocator.Get(out NetworkManager manager);
+        _networkManager = manager;
+        
         inputMessage.onEndEdit.AddListener(OnEndEdit);
 
         this.gameObject.SetActive(false);
@@ -25,13 +33,13 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         if (inputMessage.text != "")
         {
             NetConsole temp = new NetConsole(inputMessage.text);
-            if (NetworkManager.Instance.isServer)
+            if (_networkManager.isServer)
             {
-                NetworkManager.Instance.Broadcast(temp.Serialize());
+                _networkManager.Broadcast(temp.Serialize());
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
-                NetworkManager.Instance.SendToServer(temp.Serialize());
+                _networkManager.SendToServer(temp.Serialize());
 
             inputMessage.ActivateInputField();
             inputMessage.Select();

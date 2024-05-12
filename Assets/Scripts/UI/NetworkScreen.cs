@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,20 +12,26 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public InputField portInputField;
     public InputField addressInputField;
     public InputField nameInputField;
+    
+    private ServiceLocator _serviceLocator;
+    private NetworkManager _networkManager;
 
-    protected override void Initialize()
+    protected void Awake()
     {
+        _serviceLocator = ServiceLocator.global;
+        _serviceLocator.Get(out NetworkManager manager);
+        _networkManager = manager;
         connectBtn.onClick.AddListener(OnConnectBtnClick);
         startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
-
+    
     void OnConnectBtnClick()
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         int port = System.Convert.ToInt32(portInputField.text);
         string playerName = nameInputField.text;
         
-        NetworkManager.Instance.StartClient(ipAddress, port,playerName);
+        _networkManager.StartClient(ipAddress, port,playerName);
         
         SwitchToChatScreen();
     }
@@ -32,13 +39,14 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void OnStartServerBtnClick()
     {
         int port = System.Convert.ToInt32(portInputField.text);
-        NetworkManager.Instance.StartServer(port);
+        _networkManager.StartServer(port);
         SwitchToChatScreen();
     }
 
     void SwitchToChatScreen()
     {
-        ChatScreen.Instance.gameObject.SetActive(true);
+        _serviceLocator.Get(out ChatScreen chatScreen);
+        chatScreen.gameObject.SetActive(true);
         this.gameObject.SetActive(false);
     }
 }

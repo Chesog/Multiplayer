@@ -33,6 +33,7 @@ public class ServiceLocator : MonoBehaviour
         Scene scene = gameObject.scene;
         if (sceneContainers.ContainsKey(scene))
         {
+            /*This is like this at the moment because I don't make more logic for the scenes.*/
             Debug.LogError($"ServiceLocator.ConfigureForScene : Another ServiceLocator is already configured for this scene",this);
             return;
         }
@@ -87,12 +88,14 @@ public class ServiceLocator : MonoBehaviour
     public ServiceLocator Register<T>(T service)
     {
         services.Register(service);
+        Debug.Log($"ServiceLocator.Register : Registered Service of type : " + typeof(T));
         return this;
     }
     
     public ServiceLocator Register<T>(Type type,object service)
     {
         services.Register(type,service);
+        Debug.Log($"ServiceLocator.Register : Registered Service of type : " + type  + " in " + service);
         return this;
     }
 

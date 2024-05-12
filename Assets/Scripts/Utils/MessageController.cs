@@ -6,19 +6,30 @@ using UnityEngine.AI;
 
 public class MessageController : MonoBehaviourSingleton<MessageController>
 {
+    private ServiceLocator _serviceLocator;
+    private NetworkManager _networkManager;
+    private void Awake()
+    {
+        _serviceLocator = ServiceLocator.global;
+        _serviceLocator.Register<MessageController>(GetType(), this);
+    }
+
     private void OnEnable()
     {
-        NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+        _serviceLocator.Get(out NetworkManager manager);
+        _networkManager = manager;
+        _networkManager.OnReceiveEvent += OnReceiveDataEvent;
     }
 
     private void OnDisable()
     {
-        NetworkManager.Instance.OnReceiveEvent -= OnReceiveDataEvent;
+        _serviceLocator.Get(out NetworkManager manager);
+        _networkManager.OnReceiveEvent -= OnReceiveDataEvent;
     }
 
     private void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
     {
-        if (NetworkManager.Instance.isServer)
+        if (_networkManager.isServer)
             HandleServerMessage(data, ep);
         else
             HandleMessage(data);
@@ -52,9 +63,9 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                     {
                         Debug.Log("Player Name : " + player.playerName);
                         Debug.Log("Player ID : " + player.playerID);
-                        if (player.playerName == NetworkManager.Instance.playerName)
+                        if (player.playerName == _networkManager.playerName)
                         {
-                            NetworkManager.Instance.clientId = player.playerID;
+                            _networkManager.clientId = player.playerID;
                         }
                     }
 
@@ -70,10 +81,10 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                 NetPing ping = new NetPing();
                 if (ping.CheckMessage(message))
                 {
-                    if (!NetworkManager.Instance.CheckTimeDiference(DateTime.UtcNow))
+                    if (!_networkManager.CheckTimeDiference(DateTime.UtcNow))
                     {
-                        NetworkManager.Instance.SetLastRecivedPingTime(DateTime.UtcNow);
-                        NetworkManager.Instance.SendToServer(ping.Serialize());
+                        _networkManager.SetLastRecivedPingTime(DateTime.UtcNow);
+                        _networkManager.SendToServer(ping.Serialize());
                     }
                     else
                     {
@@ -100,7 +111,7 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                 NetConsole con = new NetConsole(data);
                 if (con.CheckMessage(data))
                 {
-                    NetworkManager.Instance.Broadcast(con.Serialize());
+                    _networkManager.Broadcast(con.Serialize());
                     NetConsole.OnDispatch?.Invoke(con.GetData());
                     Debug.Log(nameof(NetConsole) + ": The message is ok");
                 }
@@ -114,9 +125,9 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                 NetClientToServerHS c2s = new NetClientToServerHS(data);
                 if (c2s.CheckMessage(data))
                 {
-                    NetworkManager.Instance.AddClient(ep, c2s.GetData());
-                    NetServerToClientHS s2c = new NetServerToClientHS(NetworkManager.Instance.GetCurrentPlayers());
-                    NetworkManager.Instance.Broadcast(s2c.Serialize());
+                    _networkManager.AddClient(ep, c2s.GetData());
+                    NetServerToClientHS s2c = new NetServerToClientHS(_networkManager.GetCurrentPlayers());
+                    _networkManager.Broadcast(s2c.Serialize());
                     Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
                 }
                 else
@@ -128,10 +139,10 @@ public class MessageController : MonoBehaviourSingleton<MessageController>
                 NetPing ping = new NetPing();
                 if (ping.CheckMessage(data))
                 {
-                    if (!NetworkManager.Instance.CheckTimeDiference(DateTime.UtcNow))
+                    if (!_networkManager.CheckTimeDiference(DateTime.UtcNow))
                     {
-                        NetworkManager.Instance.SetLastRecivedPingTime(DateTime.UtcNow);
-                        NetworkManager.Instance.SendToClient(ping.Serialize(),ep);
+                        _networkManager.SetLastRecivedPingTime(DateTime.UtcNow);
+                        _networkManager.SendToClient(ping.Serialize(),ep);
                     }
                     else
                     {
