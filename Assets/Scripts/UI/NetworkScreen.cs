@@ -14,13 +14,18 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public InputField nameInputField;
     
     private ServiceLocator _serviceLocator;
-    private NetworkManager _networkManager;
+    private NetworkManagerServer _networkServer;
+    private NetworkManagerClient _networkClient;
 
     protected void Awake()
     {
         _serviceLocator = ServiceLocator.global;
-        _serviceLocator.Get(out NetworkManager manager);
-        _networkManager = manager;
+        _serviceLocator.Get(out NetworkManagerServer server);
+        _networkServer = server;
+        
+        _serviceLocator.Get(out NetworkManagerClient client);
+        _networkClient = client;
+        
         connectBtn.onClick.AddListener(OnConnectBtnClick);
         startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
@@ -31,7 +36,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int port = System.Convert.ToInt32(portInputField.text);
         string playerName = nameInputField.text;
         
-        _networkManager.StartClient(ipAddress, port,playerName);
+        _networkClient.StartClient(ipAddress, port,playerName);
         
         SwitchToChatScreen();
     }
@@ -39,7 +44,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void OnStartServerBtnClick()
     {
         int port = System.Convert.ToInt32(portInputField.text);
-        _networkManager.StartServer(port);
+        _networkServer.StartServer(port);
         SwitchToChatScreen();
     }
 
