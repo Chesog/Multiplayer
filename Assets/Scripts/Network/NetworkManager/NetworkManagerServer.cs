@@ -16,8 +16,6 @@ public class NetworkManagerServer : NetworkManager
         _serviceLocator = ServiceLocator.Global;
 
         _serviceLocator.Register<NetworkManagerServer>(GetType(), this);
-
-        NetConsole.OnDispatch += OnDispatchNetCon;
     }
 
     private void OnDisable()
@@ -29,6 +27,7 @@ public class NetworkManagerServer : NetworkManager
     {
         this.port = port;
         connection = new UdpConnection(port, this);
+        NetConsole.OnDispatch += OnDispatchNetCon;
     }
 
     public void AddClient(IPEndPoint ip, Player lean) // servidor 
@@ -41,6 +40,11 @@ public class NetworkManagerServer : NetworkManager
             clients.Add(clientId, new Client(ip, lean.playerID, Time.realtimeSinceStartup));
             players.Add(lean);
             clientId++;
+        }
+        
+        foreach (Player player in players)
+        {
+            Debug.Log("Player Name : " + player.playerName + " Player ID : " + player.playerID);
         }
     }
 

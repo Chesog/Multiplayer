@@ -14,9 +14,6 @@ public class NetworkManagerClient : NetworkManager
         _serviceLocator = ServiceLocator.Global;
 
         _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
-
-        NetConsole.OnDispatch += OnDispatchNetCon;
-        NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
     }
 
     private void OnDisable()
@@ -39,6 +36,9 @@ public class NetworkManagerClient : NetworkManager
 
         NetPing ping = new NetPing();
         SendToServer(ping.Serialize());
+
+        NetConsole.OnDispatch += OnDispatchNetCon;
+        NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
     }
 
     public void SendToServer(byte[] data)

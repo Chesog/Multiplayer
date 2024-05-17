@@ -104,10 +104,7 @@ public abstract class BaseMessage<PayloadType>
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 }
 

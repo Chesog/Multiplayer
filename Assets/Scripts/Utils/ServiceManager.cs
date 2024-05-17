@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ServiceManager : MonoBehaviour
+public class ServiceManager 
 {
     private readonly Dictionary<Type, object> services = new Dictionary<Type, object>();
     public IEnumerable<object> RegisteredServices => services.Values;

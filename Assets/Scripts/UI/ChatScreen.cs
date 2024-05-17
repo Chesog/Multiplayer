@@ -38,10 +38,9 @@ public class ChatScreen : MonoBehaviour
         if (inputMessage.text != "")
         {
             NetConsole temp = new NetConsole(inputMessage.text);
-            if (_networkManagerServer)
+            if (this == _networkManagerServer)
             {
                 _networkManagerServer.Broadcast(temp.Serialize());
-                messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
                 _networkManagerClient.SendToServer(temp.Serialize());
