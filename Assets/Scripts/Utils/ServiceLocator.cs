@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+using System.ComponentModel;
 using UnityEditor;
 
 public class ServiceLocator : MonoBehaviour
@@ -98,7 +99,13 @@ public class ServiceLocator : MonoBehaviour
         Debug.Log($"ServiceLocator.Register : Registered Service of type : " + type  + " in " + service);
         return this;
     }
-
+    
+    public void Remove<T>(T service)
+    {
+        services.Remove(typeof(T));
+        Debug.Log($"ServiceLocator.Remove : Registered Service of type : " + typeof(T));
+    }
+    
     public ServiceLocator Get<T>(out T service) where T : class
     {
         if (TryGetService(out service)) 

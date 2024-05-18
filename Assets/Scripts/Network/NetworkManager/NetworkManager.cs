@@ -6,7 +6,8 @@ using UnityEngine;
 public class NetworkManager : MonoBehaviour , IReceiveData
 {
     protected ServiceLocator _serviceLocator;
-    
+    public static bool IsServer {get;protected set; }
+
     protected void OnDispatchNetCon(string obj)
     {
         Debug.Log("OnDispatch (string obj)");
@@ -61,15 +62,16 @@ public class NetworkManager : MonoBehaviour , IReceiveData
 
     public bool CheckTimeDiference(DateTime currentTime)
     {
-        float diference = currentTime.Second - lastTimeReceivedPing.Second;
+        float diference = lastTimeReceivedPing.Second - currentTime.Second;
+        Debug.Log("Time Diference : " + diference);
         if (diference > TimeOut)
         {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
-    void Update()
+    public virtual void Update()
     {
         // Flush the data in main thread
         if (connection != null)

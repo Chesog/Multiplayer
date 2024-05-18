@@ -50,4 +50,8 @@ public class ServiceManager
 
         return this;
     }
+    public void Remove(Type type)
+    {
+        services.Remove(type);
+    }
 }

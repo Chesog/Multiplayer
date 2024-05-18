@@ -1,4 +1,5 @@
-﻿      using System.Net;
+﻿using System;
+using System.Net;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,25 +7,33 @@ public class ChatScreen : MonoBehaviour
 {
     public Text messages;
     public InputField inputMessage;
-    
+
     private ServiceLocator _serviceLocator;
-    private NetworkManagerServer _networkManagerServer;
-    private NetworkManagerClient _networkManagerClient;
+    private NetworkManagerServer _networkManagerServer = new NetworkManagerServer();
+    private NetworkManagerClient _networkManagerClient = new NetworkManagerClient();
 
     protected void Start()
     {
         _serviceLocator = ServiceLocator.Global;
         _serviceLocator.Register<ChatScreen>(GetType(), this);
-        
-        _serviceLocator.Get(out NetworkManagerServer server);
-        _networkManagerServer = server;
-        
-        _serviceLocator.Get(out NetworkManagerClient clietn);
-        _networkManagerClient = clietn;
-        
-        inputMessage.onEndEdit.AddListener(OnEndEdit);
-
         this.gameObject.SetActive(false);
+    }
+
+    public void InitChatScreen(bool isServer)
+    {
+        if (isServer)
+        {
+            _serviceLocator.Get(out NetworkManagerServer server);
+            if (server != null)
+                _networkManagerServer = server;
+        }
+        else
+        {
+            _serviceLocator.Get(out NetworkManagerClient clietn);
+            if (clietn != null)
+                _networkManagerClient = clietn;
+        }
+        inputMessage.onEndEdit.AddListener(OnEndEdit);
     }
 
     public void ReceiveConsoleMessage(string obj)
@@ -35,12 +44,13 @@ public class ChatScreen : MonoBehaviour
 
     void OnEndEdit(string str)
     {
-        if (inputMessage.text != "")
+        if (!string.IsNullOrEmpty(inputMessage.text))
         {
             NetConsole temp = new NetConsole(inputMessage.text);
-            if (this == _networkManagerServer)
+            if (NetworkManager.IsServer)
             {
                 _networkManagerServer.Broadcast(temp.Serialize());
+                messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
                 _networkManagerClient.SendToServer(temp.Serialize());
@@ -49,7 +59,5 @@ public class ChatScreen : MonoBehaviour
             inputMessage.Select();
             inputMessage.text = "";
         }
-
     }
-
 }

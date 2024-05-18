@@ -20,12 +20,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     protected void Start()
     {
         _serviceLocator = ServiceLocator.Global;
-        _serviceLocator.Get(out NetworkManagerServer server);
-        _networkServer = server;
-        
-        _serviceLocator.Get(out NetworkManagerClient client);
-        _networkClient = client;
-        
         connectBtn.onClick.AddListener(OnConnectBtnClick);
         startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
@@ -35,16 +29,38 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         int port = System.Convert.ToInt32(portInputField.text);
         string playerName = nameInputField.text;
+
+        _networkClient = _serviceLocator.gameObject.AddComponent<NetworkManagerClient>();
         
         _networkClient.StartClient(ipAddress, port,playerName);
+        _serviceLocator.Get(out NetworkManagerClient client);
+        _networkClient = client;
+        
+        _serviceLocator.Get(out ChatScreen chatScreen);
+        chatScreen.InitChatScreen(false);
         
         SwitchToChatScreen();
     }
 
     void OnStartServerBtnClick()
     {
-        int port = System.Convert.ToInt32(portInputField.text);
+        int port = Convert.ToInt32(portInputField.text);
+        IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+        
+        //_networkClient = _serviceLocator.gameObject.AddComponent<NetworkManagerClient>();
+        _networkServer = _serviceLocator.gameObject.AddComponent<NetworkManagerServer>();
+        
         _networkServer.StartServer(port);
+        _serviceLocator.Get(out NetworkManagerServer server);
+        _networkServer = server;
+        
+        //_networkClient.StartClient(ipAddress, port,"Server");
+        //_serviceLocator.Get(out NetworkManagerClient client);
+        //_networkClient = client;
+        
+        _serviceLocator.Get(out ChatScreen chatScreen);
+        chatScreen.InitChatScreen(true);
+        
         SwitchToChatScreen();
     }
 

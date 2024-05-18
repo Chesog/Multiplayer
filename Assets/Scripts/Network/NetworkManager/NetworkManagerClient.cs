@@ -9,21 +9,11 @@ public class NetworkManagerClient : NetworkManager
     public int clientId = 0; //  cliente
     public string playerName; //  cliente
 
-    private void Awake()
-    {
-        _serviceLocator = ServiceLocator.Global;
-
-        _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
-    }
-
-    private void OnDisable()
-    {
-        NetConsole.OnDispatch -= OnDispatchNetCon;
-        NetServerToClientHS.OnDispatch -= OnDispatchNetS2C;
-    }
-
     public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
     {
+        
+        _serviceLocator = ServiceLocator.Global;
+        
         this.port = port;
         this.ipAddress = ip;
         playerName = name;
@@ -39,6 +29,14 @@ public class NetworkManagerClient : NetworkManager
 
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
+        
+        _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
+    }
+    
+    private void OnDisable()
+    {
+        NetConsole.OnDispatch -= OnDispatchNetCon;
+        NetServerToClientHS.OnDispatch -= OnDispatchNetS2C;
     }
 
     public void SendToServer(byte[] data)
@@ -66,10 +64,10 @@ public class NetworkManagerClient : NetworkManager
                 if (con.CheckMessage(message))
                 {
                     NetConsole.OnDispatch?.Invoke(con.GetData());
-                    Debug.Log(nameof(NetConsole) + ": The message is ok");
+                    Debug.Log(nameof(MessageType.Console) + ": The message is ok");
                 }
                 else
-                    Debug.Log(nameof(NetConsole) + ": The message is corrupt");
+                    Debug.Log(nameof(MessageType.Console) + ": The message is corrupt");
 
                 break;
             case MessageType.Position:
@@ -91,11 +89,11 @@ public class NetworkManagerClient : NetworkManager
                     }
 
                     NetServerToClientHS.OnDispatch.Invoke(s2c.GetData());
-                    Debug.Log(nameof(NetServerToClientHS) + ": The message is ok");
+                    Debug.Log(nameof(MessageType.ServerToClientHS) + ": The message is ok");
                 }
                 else
                 {
-                    Debug.Log(nameof(NetServerToClientHS) + ": The message is corrupt");
+                    Debug.Log(nameof(MessageType.ServerToClientHS) + ": The message is corrupt");
                 }
 
                 break;
@@ -103,9 +101,9 @@ public class NetworkManagerClient : NetworkManager
                 NetPing ping = new NetPing();
                 if (ping.CheckMessage(message))
                 {
-                    if (!CheckTimeDiference(DateTime.UtcNow))
+                    if (CheckTimeDiference(DateTime.UtcNow))
                     {
-                        SetLastRecivedPingTime(DateTime.UtcNow);
+                        //SetLastRecivedPingTime(DateTime.UtcNow);
                         SendToServer(ping.Serialize());
                     }
                     else
@@ -113,14 +111,21 @@ public class NetworkManagerClient : NetworkManager
                         //NetworkManager.Instance.RemoveClient(ep);
                     }
 
-                    Debug.Log(nameof(NetClientToServerHS) + ": The message is ok");
+                    Debug.Log(nameof(MessageType.Ping) + ": The message is ok");
                 }
                 else
                 {
-                    Debug.Log(nameof(NetClientToServerHS) + ": The message is corrupt");
+                    Debug.Log(nameof(MessageType.Ping) + ": The message is corrupt");
                 }
 
                 break;
         }
+    }
+
+    public override void Update()
+    {
+        base.Update();
+        if (!CheckTimeDiference(DateTime.UtcNow))
+            Application.Quit();
     }
 }
