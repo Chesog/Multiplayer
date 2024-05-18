@@ -74,13 +74,13 @@ public class NetworkManagerServer : NetworkManager
             }
         }
     }
-
+    
     public override void OnReceiveData(byte[] data, IPEndPoint ip)
     {
         HandleServerMessage(data, ip);
     }
 
-    public void HandleServerMessage(byte[] data, IPEndPoint ep)
+    public void HandleServerMessage(byte[] data, IPEndPoint ep = null)
     {
         MessageType temp = (MessageType)BitConverter.ToInt32(data, 0);
 
@@ -101,6 +101,9 @@ public class NetworkManagerServer : NetworkManager
             case MessageType.Position:
                 break;
             case MessageType.ClientToServerHS:
+                if (ep == null)
+                    throw new ArgumentException($"NetworkManagerServer : IPEndPoint is null");
+                
                 NetClientToServerHS c2s = new NetClientToServerHS(data);
                 if (c2s.CheckMessage(data))
                 {
@@ -116,6 +119,9 @@ public class NetworkManagerServer : NetworkManager
 
                 break;
             case MessageType.Ping:
+                if (ep == null)
+                    throw new ArgumentException($"NetworkManagerServer : IPEndPoint is null");
+                
                 NetPing ping = new NetPing();
                 if (ping.CheckMessage(data))
                 {
