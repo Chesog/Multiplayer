@@ -6,13 +6,10 @@ using UnityEngine;
 
 public class NetworkManagerServer : NetworkManager
 {
-    private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>(); // servidor 
-    private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>(); // servidor
-
+    private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
+    private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
+    private Dictionary<Client, DateTime> lastPingTimeForClient = new Dictionary<Client, DateTime>();
     private int clientId;
-    
-
-
     public void StartServer(int port)
     {
         _serviceLocator = ServiceLocator.Global;
@@ -75,6 +72,22 @@ public class NetworkManagerServer : NetworkManager
         }
     }
     
+    public void SetLastRecivedPingTime(DateTime currentTime,Client client) { lastPingTimeForClient[client] = currentTime; }
+
+    public bool CheckTimeDiference(DateTime currentTime,Client client)
+    {
+        if (lastPingTimeForClient.ContainsKey(client))
+        {
+            float diference = currentTime.Second - lastPingTimeForClient[client].Second;
+            if (diference > TimeOut)
+            {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+    
     public override void OnReceiveData(byte[] data, IPEndPoint ip)
     {
         HandleServerMessage(data, ip);
@@ -125,9 +138,12 @@ public class NetworkManagerServer : NetworkManager
                 NetPing ping = new NetPing();
                 if (ping.CheckMessage(data))
                 {
-                    if (CheckTimeDiference(DateTime.UtcNow))
+                    if (!lastPingTimeForClient.ContainsKey(clients[ipToId[ep]]))
+                        lastPingTimeForClient.TryAdd(clients[ipToId[ep]],DateTime.UtcNow);
+                    
+                    if (CheckTimeDiference(DateTime.UtcNow,clients[ipToId[ep]]))
                     {
-                        SetLastRecivedPingTime(DateTime.UtcNow);
+                        SetLastRecivedPingTime(DateTime.UtcNow,clients[ipToId[ep]]);
                         SendToClient(ping.Serialize(), ep);
                     }
                     else
@@ -148,7 +164,14 @@ public class NetworkManagerServer : NetworkManager
     public override void Update()
     {
         base.Update();
-        if (!CheckTimeDiference(DateTime.UtcNow))
-            Application.Quit();
+
+        foreach (KeyValuePair<int, Client> client in clients)
+        {
+            if (!CheckTimeDiference(DateTime.UtcNow,client.Value))
+            {
+                Debug.LogWarning("NetworkManagerServer : Disconect client " + client.Value.id);
+                //Desconectar al Server
+            }
+        }
     }
 }

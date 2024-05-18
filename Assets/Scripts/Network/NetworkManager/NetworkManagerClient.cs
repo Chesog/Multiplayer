@@ -6,14 +6,15 @@ using UnityEngine;
 
 public class NetworkManagerClient : NetworkManager
 {
+    public bool setLastTime = true;
     public int clientId = 0; //  cliente
     public string playerName; //  cliente
+    private DateTime lastTimeReceivedPing = DateTime.UtcNow;
 
     public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
     {
-        
         _serviceLocator = ServiceLocator.Global;
-        
+
         this.port = port;
         this.ipAddress = ip;
         playerName = name;
@@ -29,10 +30,10 @@ public class NetworkManagerClient : NetworkManager
 
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
-        
+
         _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
     }
-    
+
     private void OnDisable()
     {
         NetConsole.OnDispatch -= OnDispatchNetCon;
@@ -52,6 +53,22 @@ public class NetworkManagerClient : NetworkManager
     public override void OnReceiveData(byte[] data, IPEndPoint ip)
     {
         HandleMessage(data);
+    }
+
+    public void SetLastRecivedPingTime(DateTime currentTime)
+    {
+        lastTimeReceivedPing = currentTime;
+    }
+
+    public bool CheckTimeDiference(DateTime currentTime)
+    {
+        float diference = currentTime.Second - lastTimeReceivedPing.Second;
+        if (diference > TimeOut)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public void HandleMessage(byte[] message)
@@ -103,7 +120,9 @@ public class NetworkManagerClient : NetworkManager
                 {
                     if (CheckTimeDiference(DateTime.UtcNow))
                     {
-                        //SetLastRecivedPingTime(DateTime.UtcNow);
+                        if (setLastTime)
+                            SetLastRecivedPingTime(DateTime.UtcNow);
+                        
                         SendToServer(ping.Serialize());
                     }
                     else
@@ -126,6 +145,8 @@ public class NetworkManagerClient : NetworkManager
     {
         base.Update();
         if (!CheckTimeDiference(DateTime.UtcNow))
-            Application.Quit();
+        {
+            Debug.LogWarning("NetworkManagerClient : Disconecting client " + playerName);
+        }
     }
 }
