@@ -46,13 +46,19 @@ public class ChatScreen : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(inputMessage.text))
         {
-            NetConsole temp = new NetConsole(inputMessage.text);
+            NetConsole temp; 
             if (NetworkManager.IsServer)
             {
+                temp = new NetConsole("Server : " + inputMessage.text);
                 _networkManagerServer.HandleServerMessage(temp.Serialize());
             }
             else
+            {
+                temp = new NetConsole(_networkManagerClient.playerName + " : " + inputMessage.text);
                 _networkManagerClient.SendToServer(temp.Serialize());
+            }
+
+            
 
             inputMessage.ActivateInputField();
             inputMessage.Select();

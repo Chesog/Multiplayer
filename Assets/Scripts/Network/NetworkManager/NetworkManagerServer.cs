@@ -165,12 +165,15 @@ public class NetworkManagerServer : NetworkManager
     {
         base.Update();
 
-        foreach (KeyValuePair<int, Client> client in clients)
+        if (clients.Count != 0)
         {
-            if (!CheckTimeDiference(DateTime.UtcNow,client.Value))
+            foreach (KeyValuePair<int, Client> client in clients)
             {
-                Debug.LogWarning("NetworkManagerServer : Disconect client " + client.Value.id);
-                //Desconectar al Server
+                if (!CheckTimeDiference(DateTime.UtcNow,client.Value))
+                {
+                    Debug.LogWarning("NetworkManagerServer : Disconect client " + client.Value.id);
+                    //Desconectar al Server
+                }
             }
         }
     }
