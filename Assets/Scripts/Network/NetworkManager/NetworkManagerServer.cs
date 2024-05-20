@@ -10,19 +10,20 @@ public class NetworkManagerServer : NetworkManager
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
     private Dictionary<Client, DateTime> lastPingTimeForClient = new Dictionary<Client, DateTime>();
     private int clientId;
+
     public void StartServer(int port)
     {
         _serviceLocator = ServiceLocator.Global;
-        
+
         this.port = port;
         connection = new UdpConnection(port, this);
 
         IsServer = true;
-     
+
         _serviceLocator.Register<NetworkManagerServer>(GetType(), this);
         NetConsole.OnDispatch += OnDispatchNetCon;
     }
-    
+
     private void OnDestroy()
     {
         NetConsole.OnDispatch -= OnDispatchNetCon;
@@ -39,7 +40,7 @@ public class NetworkManagerServer : NetworkManager
             players.Add(lean);
             clientId++;
         }
-        
+
         foreach (Player player in players)
         {
             Debug.Log("Player Name : " + player.playerName + " Player ID : " + player.playerID);
@@ -71,10 +72,13 @@ public class NetworkManagerServer : NetworkManager
             }
         }
     }
-    
-    public void SetLastRecivedPingTime(DateTime currentTime,Client client) { lastPingTimeForClient[client] = currentTime; }
 
-    public bool CheckTimeDiference(DateTime currentTime,Client client)
+    public void SetLastRecivedPingTime(DateTime currentTime, Client client)
+    {
+        lastPingTimeForClient[client] = currentTime;
+    }
+
+    public bool CheckTimeDiference(DateTime currentTime, Client client)
     {
         if (lastPingTimeForClient.ContainsKey(client))
         {
@@ -83,11 +87,13 @@ public class NetworkManagerServer : NetworkManager
             {
                 return false;
             }
+
             return true;
         }
+
         return false;
     }
-    
+
     public override void OnReceiveData(byte[] data, IPEndPoint ip)
     {
         HandleServerMessage(data, ip);
@@ -116,7 +122,7 @@ public class NetworkManagerServer : NetworkManager
             case MessageType.ClientToServerHS:
                 if (ep == null)
                     throw new ArgumentException($"NetworkManagerServer : IPEndPoint is null");
-                
+
                 NetClientToServerHS c2s = new NetClientToServerHS(data);
                 if (c2s.CheckMessage(data))
                 {
@@ -134,16 +140,16 @@ public class NetworkManagerServer : NetworkManager
             case MessageType.Ping:
                 if (ep == null)
                     throw new ArgumentException($"NetworkManagerServer : IPEndPoint is null");
-                
+
                 NetPing ping = new NetPing();
                 if (ping.CheckMessage(data))
                 {
                     if (!lastPingTimeForClient.ContainsKey(clients[ipToId[ep]]))
-                        lastPingTimeForClient.TryAdd(clients[ipToId[ep]],DateTime.UtcNow);
-                    
-                    if (CheckTimeDiference(DateTime.UtcNow,clients[ipToId[ep]]))
+                        lastPingTimeForClient.TryAdd(clients[ipToId[ep]], DateTime.UtcNow);
+
+                    if (CheckTimeDiference(DateTime.UtcNow, clients[ipToId[ep]]))
                     {
-                        SetLastRecivedPingTime(DateTime.UtcNow,clients[ipToId[ep]]);
+                        SetLastRecivedPingTime(DateTime.UtcNow, clients[ipToId[ep]]);
                         SendToClient(ping.Serialize(), ep);
                     }
                     else
@@ -161,15 +167,15 @@ public class NetworkManagerServer : NetworkManager
                 break;
         }
     }
+
     public override void Update()
     {
         base.Update();
-
-        if (clients.Count != 0)
+        if (clients.Count > 0)
         {
             foreach (KeyValuePair<int, Client> client in clients)
             {
-                if (!CheckTimeDiference(DateTime.UtcNow,client.Value))
+                if (!CheckTimeDiference(DateTime.UtcNow, client.Value))
                 {
                     Debug.LogWarning("NetworkManagerServer : Disconect client " + client.Value.id);
                     //Desconectar al Server

@@ -277,7 +277,7 @@ public class NetPing : BaseMessage<object>
     }
 }
 
-public class NetVector3 : BaseMessage<UnityEngine.Vector3>
+public class NetVector3 : BaseMessage<Vector3>
 {
     private static ulong lastMsgID = 0;
 
