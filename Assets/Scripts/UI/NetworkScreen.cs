@@ -41,7 +41,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         _networkClient = client;
         
         _serviceLocator.Get(out ChatScreen chatScreen);
-        chatScreen.InitChatScreen(false);
+        chatScreen.InitChatScreen();
         
         SwitchToChatScreen();
         Instantiate(playerRep, playerSpawn);
@@ -61,7 +61,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         _networkServer = server;
         
         _serviceLocator.Get(out ChatScreen chatScreen);
-        chatScreen.InitChatScreen(true);
+        chatScreen.InitChatScreen();
         
         SwitchToChatScreen();
         _serviceLocator.Get(out CameraController cameraController);
@@ -71,7 +71,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void SwitchToChatScreen()
     {
         _serviceLocator.Get(out ChatScreen chatScreen);
-        chatScreen.gameObject.SetActive(true);
+        chatScreen.gameObject.SetActive(false);
         this.gameObject.SetActive(false);
     }
 }
