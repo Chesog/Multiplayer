@@ -6,16 +6,21 @@ using UnityEngine;
 public class Player_Movement : MonoBehaviour
 {
     private ServiceLocator _serviceLocator;
-    [SerializeField] private InputReader _input;
+    [SerializeField] private Rigidbody _rigidbody;
+
+    [Header("Movement")] 
+    [SerializeField] private float speed = 5.0f;
+    private Vector3 _CurrentMovement;
 
     private void OnEnable()
     {
         _serviceLocator = ServiceLocator.Global;
-        _input.OnPlayerMove += MovePlayer;
+        _serviceLocator.Register<Player_Movement>(GetType(), this);
     }
 
-    private void MovePlayer(Vector2 obj)
+    public void MovePlayer(Vector3 obj)
     {
-        
+        _CurrentMovement = new Vector3(obj.x, 0f, obj.y);
+        _rigidbody.AddForce(_CurrentMovement * speed);
     }
 }

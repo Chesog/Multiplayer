@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
-using UnityEditor.VersionControl;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 

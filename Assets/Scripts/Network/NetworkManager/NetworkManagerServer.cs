@@ -37,11 +37,11 @@ public class NetworkManagerServer : NetworkManager
             ipToId[ip] = clientId;
 
             clients.Add(clientId, new Client(ip, lean.playerID, Time.realtimeSinceStartup));
-            players.Add(lean);
+            playersInMatch.Add(lean);
             clientId++;
         }
 
-        foreach (Player player in players)
+        foreach (Player player in playersInMatch)
         {
             Debug.Log("Player Name : " + player.playerName + " Player ID : " + player.playerID);
         }
@@ -118,6 +118,17 @@ public class NetworkManagerServer : NetworkManager
 
                 break;
             case MessageType.Position:
+                NetVector3 pos = new NetVector3(data);
+                if (pos.CheckMessage(data))
+                {
+                    SendToClient(pos.Serialize(), ep);
+                    Debug.Log(nameof(MessageType.Position) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(MessageType.Position) + ": The message is corrupt");
+                }
+
                 break;
             case MessageType.ClientToServerHS:
                 if (ep == null)
@@ -127,8 +138,18 @@ public class NetworkManagerServer : NetworkManager
                 if (c2s.CheckMessage(data))
                 {
                     AddClient(ep, c2s.GetData());
+
                     NetServerToClientHS s2c = new NetServerToClientHS(GetCurrentPlayers());
                     Broadcast(s2c.Serialize());
+
+                    NetPlayerList updatedList = new NetPlayerList(GetCurrentPlayers());
+                    Broadcast(updatedList.Serialize());
+
+                    foreach (Player player in playersInMatch)
+                    {
+                        SpawnPlayer();
+                    }
+
                     Debug.Log(nameof(MessageType.ClientToServerHS) + ": The message is ok");
                 }
                 else

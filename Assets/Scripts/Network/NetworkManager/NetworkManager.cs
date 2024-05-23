@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class NetworkManager : MonoBehaviour , IReceiveData
 {
@@ -18,19 +19,19 @@ public class NetworkManager : MonoBehaviour , IReceiveData
     protected int TimeOut = 15;
     protected Action<byte[], IPEndPoint> OnReceiveEvent;
     protected UdpConnection connection;
-    protected List<Player> players = new List<Player>();
+    protected List<Player> playersInMatch = new List<Player>();
     
     protected void RemovePlayer(int id)
     {
         Player aux = new Player();
-        foreach (var player in players)
+        foreach (var player in playersInMatch)
         {
             if (player.playerID == id)
                 aux = player;
         }
 
-        if (players.Contains(aux))
-            players.Remove(aux);
+        if (playersInMatch.Contains(aux))
+            playersInMatch.Remove(aux);
 
     }
 
@@ -40,7 +41,15 @@ public class NetworkManager : MonoBehaviour , IReceiveData
             OnReceiveEvent.Invoke(data, ip);
     }
 
-    public List<Player> GetCurrentPlayers() { return players; }
+    protected void SpawnPlayer()
+    {
+        _serviceLocator.Get(out NetworkScreen networkScreen);
+        Vector2 rng = Random.insideUnitSphere * 5.0f;
+        networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
+        Instantiate(networkScreen.sidePlayerRep, networkScreen.playerSpawn);
+    }
+
+    public List<Player> GetCurrentPlayers() { return playersInMatch; }
     
     public virtual void Update()
     {

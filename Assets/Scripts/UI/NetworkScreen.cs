@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Net;
@@ -12,7 +10,8 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public InputField portInputField;
     public InputField addressInputField;
     public InputField nameInputField;
-    public GameObject playerRep;
+    public GameObject mainPlayerRep;
+    public GameObject sidePlayerRep;
     public Transform playerSpawn;
     public Transform serverCameraPos;
     
@@ -24,6 +23,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     protected void Start()
     {
         _serviceLocator = ServiceLocator.Global;
+        _serviceLocator.Register<NetworkScreen>(GetType(), this);
         connectBtn.onClick.AddListener(OnConnectBtnClick);
         startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
@@ -44,9 +44,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         chatScreen.InitChatScreen();
         
         SwitchToChatScreen();
-        Instantiate(playerRep, playerSpawn);
-        _serviceLocator.Get(out CameraController cameraController);
-        cameraController.InitCamera(playerRep.GetComponentInChildren<Transform>());
     }
 
     void OnStartServerBtnClick()

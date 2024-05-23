@@ -15,7 +15,8 @@ public enum MessageType
     ClientToServerHS = -2,
     Ping = 0,
     Console = 1,
-    Position = 2
+    Position = 2,
+    PlayerList = 3
 }
 
 public abstract class BaseMessage<PayloadType>
@@ -126,11 +127,18 @@ public struct Player
 {
     public string playerName;
     public int playerID;
+    public int hp;
+    public const int maxHP = 3;
+    public Vector3 playerPos;
+    public Vector3 playerRot;
 
     public Player(string playerName, int playerID)
     {
         this.playerName = playerName;
         this.playerID = playerID;
+        playerPos = Vector3.zero;
+        playerRot = Vector3.zero;
+        hp = maxHP;
     }
 }
 
@@ -161,6 +169,13 @@ public class NetServerToClientHS : BaseMessage<List<Player>>
         foreach (var player in data)
         {
             outData.AddRange(BitConverter.GetBytes(player.playerID));
+            outData.AddRange(BitConverter.GetBytes(player.hp));
+            outData.AddRange(BitConverter.GetBytes(player.playerPos.x));
+            outData.AddRange(BitConverter.GetBytes(player.playerPos.y));
+            outData.AddRange(BitConverter.GetBytes(player.playerPos.z));
+            outData.AddRange(BitConverter.GetBytes(player.playerRot.x));
+            outData.AddRange(BitConverter.GetBytes(player.playerRot.y));
+            outData.AddRange(BitConverter.GetBytes(player.playerRot.z));
             outData.AddRange(BitConverter.GetBytes(player.playerName.Length));
             outData.AddRange(Encoding.UTF8.GetBytes(player.playerName));
         }
@@ -180,10 +195,17 @@ public class NetServerToClientHS : BaseMessage<List<Player>>
         {
             Player temp = new Player();
             temp.playerID = BitConverter.ToInt32(message, offset + 8);
-            int stringlength = BitConverter.ToInt32(message, offset + 12);
-            temp.playerName = Encoding.UTF8.GetString(message, offset + 16, stringlength);
+            temp.hp = BitConverter.ToInt32(message, offset + 12);
+            temp.playerPos.x = BitConverter.ToSingle(message, offset + 16);
+            temp.playerPos.y = BitConverter.ToSingle(message, offset + 20);
+            temp.playerPos.z = BitConverter.ToSingle(message, offset + 24);
+            temp.playerRot.x = BitConverter.ToSingle(message, offset + 28);
+            temp.playerRot.y = BitConverter.ToSingle(message, offset + 32);
+            temp.playerRot.z = BitConverter.ToSingle(message, offset + 36);
+            int stringlength = BitConverter.ToInt32(message, offset + 40);
+            temp.playerName = Encoding.UTF8.GetString(message, offset + 44, stringlength);
             aux.Add(temp);
-            offset += 8 + stringlength;
+            offset += 36 + stringlength;
         }
 
         return aux;
@@ -285,14 +307,18 @@ public class NetVector3 : BaseMessage<Vector3>
     {
         this.data = data;
     }
+    public NetVector3(byte[] dataToDeserialize)
+    {
+        data = Deserialize(dataToDeserialize);
+    }
 
     public override Vector3 Deserialize(byte[] message)
     {
         Vector3 outData;
 
-        outData.x = BitConverter.ToSingle(message, 8);
-        outData.y = BitConverter.ToSingle(message, 12);
-        outData.z = BitConverter.ToSingle(message, 16);
+        outData.x = BitConverter.ToSingle(message, 4);
+        outData.y = BitConverter.ToSingle(message, 8);
+        outData.z = BitConverter.ToSingle(message, 12);
 
         return outData;
     }
@@ -312,7 +338,6 @@ public class NetVector3 : BaseMessage<Vector3>
         List<byte> outData = new List<byte>();
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
-        outData.AddRange(BitConverter.GetBytes(lastMsgID++));
         outData.AddRange(BitConverter.GetBytes(data.x));
         outData.AddRange(BitConverter.GetBytes(data.y));
         outData.AddRange(BitConverter.GetBytes(data.z));
@@ -368,3 +393,73 @@ public class NetConsole : BaseMessage<String>
         return data;
     }
 }
+    public class NetPlayerList : BaseMessage<List<Player>>
+    {
+        public NetPlayerList(List<Player> updatedPlayerList)
+        {
+            data = updatedPlayerList;
+        }
+        public NetPlayerList(byte[] message)
+        {
+            data = Deserialize(message);
+        }
+
+        public override MessageType GetMessageType()
+        {
+            return MessageType.PlayerList;
+        }
+
+        public override byte[] Serialize()
+        {
+            List<byte> outData = new List<byte>();
+
+            outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+            outData.AddRange(BitConverter.GetBytes(data.Count));
+
+            foreach (var player in data)
+            {
+                outData.AddRange(BitConverter.GetBytes(player.playerID));
+                outData.AddRange(BitConverter.GetBytes(player.hp));
+                outData.AddRange(BitConverter.GetBytes(player.playerPos.x));
+                outData.AddRange(BitConverter.GetBytes(player.playerPos.y));
+                outData.AddRange(BitConverter.GetBytes(player.playerPos.z));
+                outData.AddRange(BitConverter.GetBytes(player.playerRot.x));
+                outData.AddRange(BitConverter.GetBytes(player.playerRot.y));
+                outData.AddRange(BitConverter.GetBytes(player.playerRot.z));
+                outData.AddRange(BitConverter.GetBytes(player.playerName.Length));
+                outData.AddRange(Encoding.UTF8.GetBytes(player.playerName));
+            }
+        
+            base.EncryptMessage(outData);
+
+            return outData.ToArray();
+        }
+
+        public override List<Player> Deserialize(byte[] message)
+        {
+            List<Player> aux = new List<Player>();
+
+            int playersAmmount = BitConverter.ToInt32(message, 4);
+            int offset = 0;
+            for (int i = 0; i < playersAmmount; i++)
+            {
+                Player temp = new Player();
+                temp.playerID = BitConverter.ToInt32(message, offset + 8);
+                temp.hp = BitConverter.ToInt32(message, offset + 12);
+                temp.playerPos.x = BitConverter.ToSingle(message, offset + 16);
+                temp.playerPos.y = BitConverter.ToSingle(message, offset + 20);
+                temp.playerPos.z = BitConverter.ToSingle(message, offset + 24);
+                temp.playerRot.x = BitConverter.ToSingle(message, offset + 28);
+                temp.playerRot.y = BitConverter.ToSingle(message, offset + 32);
+                temp.playerRot.z = BitConverter.ToSingle(message, offset + 36);
+                int stringlength = BitConverter.ToInt32(message, offset + 40);
+                temp.playerName = Encoding.UTF8.GetString(message, offset + 44, stringlength);
+                aux.Add(temp);
+                offset += 36 + stringlength;
+            }
+
+            return aux;
+        }
+
+        public override List<Player> GetData() { return data; }
+    }

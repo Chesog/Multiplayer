@@ -7,32 +7,25 @@ using UnityEngine.InputSystem;
 public class InputReader : MonoBehaviour
 {
     private ServiceLocator _serviceLocator;
+    private NetworkManagerClient _client;
     private ChatScreen _chatScreen;
-    [SerializeField] private PlayerInput _input;
+
 
     void OnEnable()
     {
         _serviceLocator = ServiceLocator.Global;
-        _serviceLocator.Get<ChatScreen>(out ChatScreen chat);
+        _serviceLocator.Register<Player_Movement>(GetType(), this);
+        _serviceLocator.Get(out ChatScreen chat);
         _chatScreen = chat;
-        _input = GetComponent<PlayerInput>();
+        _serviceLocator.Get(out NetworkManagerClient client);
+        _client = client;
     }
-
-
-    /// <summary>
-    /// Action Event For The Player Movement
-    /// </summary>
-    public event Action<Vector2> OnPlayerMove;
-
-    public event Action<bool> OnPlayerOpenChat;
-
-    /// <summary>
-    /// Triggers The Movement Event
-    /// </summary>
-    /// <param name="input"></param>
+    
     public void OnMove(InputValue input)
     {
-        OnPlayerMove?.Invoke(input.Get<Vector2>());
+        Vector3 aux = input.Get<Vector3>();
+        NetVector3 movement = new NetVector3(aux);
+        _client.SendToServer(movement.Serialize());
     }
 
     public void OnOpenChat(InputValue input)

@@ -9,7 +9,7 @@
                     "name": "Move",
                     "type": "Value",
                     "id": "1fdfa198-63c7-43ba-bfd9-f4cf431d4783",
-                    "expectedControlType": "Vector2",
+                    "expectedControlType": "Vector3",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -26,9 +26,9 @@
             ],
             "bindings": [
                 {
-                    "name": "2D Vector",
+                    "name": "WASD",
                     "id": "e05070d3-52f6-47d7-a9c7-4339a2272411",
-                    "path": "2DVector(mode=1)",
+                    "path": "3DVector(mode=1)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -73,6 +73,28 @@
                     "name": "Right",
                     "id": "f02ff9f8-4cf9-4361-a75d-cbfa579654c2",
                     "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Forward",
+                    "id": "cd9f4107-a189-4a6f-b100-0ac4ef57388f",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Backward",
+                    "id": "e822eebd-be00-49a2-a085-023adbb5052c",
+                    "path": "",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

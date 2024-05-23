@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class NetworkManagerClient : NetworkManager
 {
@@ -14,6 +15,9 @@ public class NetworkManagerClient : NetworkManager
     public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
     {
         _serviceLocator = ServiceLocator.Global;
+        _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
+        NetConsole.OnDispatch += OnDispatchNetCon;
+        NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
 
         this.port = port;
         this.ipAddress = ip;
@@ -21,17 +25,22 @@ public class NetworkManagerClient : NetworkManager
 
         connection = new UdpConnection(ip, port, this);
 
+        _serviceLocator.Get(out NetworkScreen networkScreen);
+
         Player aux = new Player(name, -7);
+
+        Vector2 rng = Random.insideUnitSphere * 5.0f;
+        networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
+        Instantiate(networkScreen.mainPlayerRep, networkScreen.playerSpawn);
+        _serviceLocator.Get(out CameraController cameraController);
+        cameraController.InitCamera(networkScreen.mainPlayerRep.transform);
+        aux.playerPos = networkScreen.mainPlayerRep.transform.position;
+
         NetClientToServerHS nacho = new NetClientToServerHS(aux);
         SendToServer(nacho.Serialize());
 
         NetPing ping = new NetPing();
         SendToServer(ping.Serialize());
-
-        NetConsole.OnDispatch += OnDispatchNetCon;
-        NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
-
-        _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
     }
 
     private void OnDisable()
@@ -47,7 +56,7 @@ public class NetworkManagerClient : NetworkManager
 
     protected void OnDispatchNetS2C(List<Player> obj)
     {
-        players = obj;
+        playersInMatch = obj;
     }
 
     public override void OnReceiveData(byte[] data, IPEndPoint ip)
@@ -88,14 +97,25 @@ public class NetworkManagerClient : NetworkManager
 
                 break;
             case MessageType.Position:
-                //OnRecievePositionMessage?.Invoke();
+                NetVector3 pos = new NetVector3(message);
+                if (pos.CheckMessage(message))
+                {
+                    _serviceLocator.Get(out Player_Movement playerMovement);
+                    playerMovement.MovePlayer(pos.GetData());
+                    Debug.Log(nameof(MessageType.Position) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(MessageType.Position) + ": The message is corrupt");
+                }
+
                 break;
             case MessageType.ServerToClientHS:
                 NetServerToClientHS s2c = new NetServerToClientHS(message);
                 if (s2c.CheckMessage(message))
                 {
                     //Chekear si mi nombre esta en la lista , si no esta volver a mandar un handshake 
-                    foreach (var player in s2c.GetData())
+                    foreach (Player player in s2c.GetData())
                     {
                         Debug.Log("Player Name : " + player.playerName);
                         Debug.Log("Player ID : " + player.playerID);
@@ -122,7 +142,7 @@ public class NetworkManagerClient : NetworkManager
                     {
                         if (setLastTime)
                             SetLastRecivedPingTime(DateTime.UtcNow);
-                        
+
                         SendToServer(ping.Serialize());
                     }
                     else
@@ -135,6 +155,28 @@ public class NetworkManagerClient : NetworkManager
                 else
                 {
                     Debug.Log(nameof(MessageType.Ping) + ": The message is corrupt");
+                }
+
+                break;
+            case MessageType.PlayerList:
+                NetPlayerList newList = new NetPlayerList(message);
+                if (newList.CheckMessage(message))
+                {
+                    _serviceLocator.Get(out NetworkManagerClient client);
+                    playersInMatch = newList.GetData();
+                    foreach (Player player in playersInMatch)
+                    {
+                        if (player.playerID != clientId)
+                        {
+                            SpawnPlayer();
+                        }
+                    }
+
+                    Debug.Log(nameof(MessageType.PlayerList) + ": The message is ok");
+                }
+                else
+                {
+                    Debug.Log(nameof(MessageType.PlayerList) + ": The message is corrupt");
                 }
 
                 break;

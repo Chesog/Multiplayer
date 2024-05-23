@@ -434,7 +434,9 @@ MonoBehaviour:
   portInputField: {fileID: 1558557928}
   addressInputField: {fileID: 2123302590}
   nameInputField: {fileID: 641574618}
-  playerRep: {fileID: 4977653177038878461, guid: db68a31ae3668dc488c36efffc38f607,
+  mainPlayerRep: {fileID: 4977653177038878461, guid: db68a31ae3668dc488c36efffc38f607,
+    type: 3}
+  sidePlayerRep: {fileID: 4977653177038878461, guid: 921ef8c24976e6148bdadb453e21836c,
     type: 3}
   playerSpawn: {fileID: 710038745}
   serverCameraPos: {fileID: 111641200}
@@ -1285,7 +1287,7 @@ Transform:
   m_GameObject: {fileID: 710038744}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 5.89, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

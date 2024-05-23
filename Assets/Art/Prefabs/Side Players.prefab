@@ -14,10 +14,8 @@ GameObject:
   - component: {fileID: 8629660161291294926}
   - component: {fileID: 8568899812220881368}
   - component: {fileID: 9057592161064263478}
-  - component: {fileID: 8911749390845120425}
-  - component: {fileID: 9209881803110797868}
   m_Layer: 0
-  m_Name: Main Player
+  m_Name: Side Players
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0a707dd5f4689654c814a17cf648d4de, type: 2}
+  - {fileID: 2100000, guid: 1f0e35de044d6bd4c95a9cdf5ad8b14e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -170,32 +168,6 @@ MonoBehaviour:
   m_DefaultActionMap: World
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &8911749390845120425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4977653177038878461}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4834f29d794bd9a448b7bf26c98844e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &9209881803110797868
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4977653177038878461}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b46d86a4aa5040a44b8adc41b868b650, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rigidbody: {fileID: 8568899812220881368}
-  speed: 100
 --- !u!1 &5161868000709859666
 GameObject:
   m_ObjectHideFlags: 0
