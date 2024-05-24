@@ -10,17 +10,19 @@ public class NetworkManager : MonoBehaviour , IReceiveData
     public IPAddress ipAddress { get; protected set; }
     public static bool IsServer {get;protected set; }
     protected ServiceLocator _serviceLocator;
+
+    protected int TimeOut = 15;
+    protected Action<byte[], IPEndPoint> OnReceiveEvent;
+    protected UdpConnection connection;
+    protected List<Player> playersInMatch = new List<Player>();
+    protected Dictionary<GameObject, int> spawnedPlayers = new Dictionary<GameObject, int>();
+    
     protected void OnDispatchNetCon(string obj)
     {
         Debug.Log("OnDispatch (string obj)");
         _serviceLocator.Get(out ChatScreen chatScreen);
         chatScreen.ReceiveConsoleMessage(obj);
     }
-    protected int TimeOut = 15;
-    protected Action<byte[], IPEndPoint> OnReceiveEvent;
-    protected UdpConnection connection;
-    protected List<Player> playersInMatch = new List<Player>();
-    
     protected void RemovePlayer(int id)
     {
         Player aux = new Player();
@@ -41,12 +43,12 @@ public class NetworkManager : MonoBehaviour , IReceiveData
             OnReceiveEvent.Invoke(data, ip);
     }
 
-    protected void SpawnPlayer()
+    protected GameObject SpawnSidePlayer()
     {
         _serviceLocator.Get(out NetworkScreen networkScreen);
         Vector2 rng = Random.insideUnitSphere * 5.0f;
         networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
-        Instantiate(networkScreen.sidePlayerRep, networkScreen.playerSpawn);
+        return Instantiate(networkScreen.sidePlayerRep, networkScreen.playerSpawn);
     }
 
     public List<Player> GetCurrentPlayers() { return playersInMatch; }

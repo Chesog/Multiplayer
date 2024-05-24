@@ -147,7 +147,8 @@ public class NetworkManagerServer : NetworkManager
 
                     foreach (Player player in playersInMatch)
                     {
-                        SpawnPlayer();
+                        if (!spawnedPlayers.ContainsValue(player.playerID))
+                            spawnedPlayers.Add(SpawnSidePlayer(), player.playerID);
                     }
 
                     Debug.Log(nameof(MessageType.ClientToServerHS) + ": The message is ok");

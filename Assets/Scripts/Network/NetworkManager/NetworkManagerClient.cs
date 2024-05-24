@@ -11,6 +11,7 @@ public class NetworkManagerClient : NetworkManager
     public int clientId = 0; //  cliente
     public string playerName; //  cliente
     private DateTime lastTimeReceivedPing = DateTime.UtcNow;
+    private Player clientPlayer;
 
     public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
     {
@@ -25,18 +26,8 @@ public class NetworkManagerClient : NetworkManager
 
         connection = new UdpConnection(ip, port, this);
 
-        _serviceLocator.Get(out NetworkScreen networkScreen);
-
-        Player aux = new Player(name, -7);
-
-        Vector2 rng = Random.insideUnitSphere * 5.0f;
-        networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
-        Instantiate(networkScreen.mainPlayerRep, networkScreen.playerSpawn);
-        _serviceLocator.Get(out CameraController cameraController);
-        cameraController.InitCamera(networkScreen.mainPlayerRep.transform);
-        aux.playerPos = networkScreen.mainPlayerRep.transform.position;
-
-        NetClientToServerHS nacho = new NetClientToServerHS(aux);
+        clientPlayer = new Player(name, -7);
+        NetClientToServerHS nacho = new NetClientToServerHS(clientPlayer);
         SendToServer(nacho.Serialize());
 
         NetPing ping = new NetPing();
@@ -122,6 +113,7 @@ public class NetworkManagerClient : NetworkManager
                         if (player.playerName == playerName)
                         {
                             clientId = player.playerID;
+                            clientPlayer.playerID = player.playerID;
                         }
                     }
 
@@ -166,9 +158,13 @@ public class NetworkManagerClient : NetworkManager
                     playersInMatch = newList.GetData();
                     foreach (Player player in playersInMatch)
                     {
-                        if (player.playerID != clientId)
+                        if (player.playerID != clientId && !spawnedPlayers.ContainsValue(player.playerID))
                         {
-                            SpawnPlayer();
+                            spawnedPlayers.Add(SpawnSidePlayer(),player.playerID);
+                        }
+                        else if (player.playerID == clientId && !spawnedPlayers.ContainsValue(player.playerID))
+                        {
+                            spawnedPlayers.Add(SpawnMainPlayer(),player.playerID);
                         }
                     }
 
@@ -181,6 +177,18 @@ public class NetworkManagerClient : NetworkManager
 
                 break;
         }
+    }
+
+    private GameObject SpawnMainPlayer()
+    {
+        _serviceLocator.Get(out NetworkScreen networkScreen);
+        
+        Vector2 rng = Random.insideUnitSphere * 5.0f;
+        networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
+        _serviceLocator.Get(out CameraController cameraController);
+        cameraController.InitCamera(networkScreen.mainPlayerRep.transform);
+        clientPlayer.playerPos = networkScreen.mainPlayerRep.transform.position;
+        return Instantiate(networkScreen.mainPlayerRep, networkScreen.playerSpawn);
     }
 
     public override void Update()

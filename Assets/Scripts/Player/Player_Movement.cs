@@ -21,6 +21,10 @@ public class Player_Movement : MonoBehaviour
     public void MovePlayer(Vector3 obj)
     {
         _CurrentMovement = new Vector3(obj.x, 0f, obj.y);
+    }
+
+    private void FixedUpdate()
+    {
         _rigidbody.AddForce(_CurrentMovement * speed);
     }
 }
