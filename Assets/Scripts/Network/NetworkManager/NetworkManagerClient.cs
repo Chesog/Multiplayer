@@ -88,11 +88,17 @@ public class NetworkManagerClient : NetworkManager
 
                 break;
             case MessageType.Position:
-                NetVector3 pos = new NetVector3(message);
+                NetPosition pos = new NetPosition(message);
                 if (pos.CheckMessage(message))
                 {
-                    _serviceLocator.Get(out Player_Movement playerMovement);
-                    playerMovement.MovePlayer(pos.GetData());
+                    if (pos.GetData().Item1 == (int)ObjectType.Player)
+                    {
+                        if (spawnedPlayers.ContainsKey(pos.GetData().Item2))
+                        {
+                            spawnedPlayers[pos.GetData().Item2].transform.position = pos.GetData().Item3;
+                            playersInMatch[pos.GetData().Item2].SetPosition(pos.GetData().Item3);
+                        }
+                    }
                     Debug.Log(nameof(MessageType.Position) + ": The message is ok");
                 }
                 else
@@ -158,13 +164,13 @@ public class NetworkManagerClient : NetworkManager
                     playersInMatch = newList.GetData();
                     foreach (Player player in playersInMatch)
                     {
-                        if (player.playerID != clientId && !spawnedPlayers.ContainsValue(player.playerID))
+                        if (player.playerID != clientId && !spawnedPlayers.ContainsKey(player.playerID))
                         {
-                            spawnedPlayers.Add(SpawnSidePlayer(),player.playerID);
+                            spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
                         }
-                        else if (player.playerID == clientId && !spawnedPlayers.ContainsValue(player.playerID))
+                        else if (player.playerID == clientId && !spawnedPlayers.ContainsKey(player.playerID))
                         {
-                            spawnedPlayers.Add(SpawnMainPlayer(),player.playerID);
+                            spawnedPlayers.Add(player.playerID,SpawnMainPlayer());
                         }
                     }
 

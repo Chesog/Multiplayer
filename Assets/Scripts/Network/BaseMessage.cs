@@ -19,6 +19,12 @@ public enum MessageType
     PlayerList = 3
 }
 
+public enum ObjectType
+{
+    Bullet = 0,
+    Player = 1
+}
+
 public abstract class BaseMessage<PayloadType>
 {
     protected PayloadType data;
@@ -139,6 +145,11 @@ public struct Player
         playerPos = Vector3.zero;
         playerRot = Vector3.zero;
         hp = maxHP;
+    }
+
+    public void SetPosition(Vector3 newPos)
+    {
+        playerPos = newPos;
     }
 }
 
@@ -348,6 +359,54 @@ public class NetVector3 : BaseMessage<Vector3>
     }
 
     //Dictionary<Client,Dictionary<msgType,int>>
+}
+
+public class NetPosition : BaseMessage<(int,int,Vector3)>
+{
+    public NetPosition(byte[] dataToDeserialize)
+    {
+        data = Deserialize(dataToDeserialize);
+    }
+
+    public NetPosition((int,int,Vector3) data)
+    {
+        this.data = data;
+    }
+    public override MessageType GetMessageType()
+    {
+        return MessageType.Position;
+    }
+
+    public override byte[] Serialize()
+    {
+        List<byte> outData = new List<byte>();
+
+        outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+        outData.AddRange(BitConverter.GetBytes(data.Item1));
+        outData.AddRange(BitConverter.GetBytes(data.Item2));
+        outData.AddRange(BitConverter.GetBytes(data.Item3.x));
+        outData.AddRange(BitConverter.GetBytes(data.Item3.y));
+        outData.AddRange(BitConverter.GetBytes(data.Item3.z));
+        
+        base.EncryptMessage(outData);
+
+        return outData.ToArray();
+    }
+
+    public override (int,int,Vector3) Deserialize(byte[] message)
+    {
+        (int,int,Vector3) outData;
+
+        outData.Item1 = BitConverter.ToInt32(message, 4);
+        outData.Item2 = BitConverter.ToInt32(message, 8);
+        outData.Item3.x = BitConverter.ToSingle(message, 12);
+        outData.Item3.y = BitConverter.ToSingle(message, 16);
+        outData.Item3.z = BitConverter.ToSingle(message, 20);
+
+        return outData;
+    }
+
+    public override (int,int,Vector3) GetData() { return data; }
 }
 
 public class NetConsole : BaseMessage<String>

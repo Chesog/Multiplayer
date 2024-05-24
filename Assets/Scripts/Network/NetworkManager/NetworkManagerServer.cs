@@ -73,6 +73,18 @@ public class NetworkManagerServer : NetworkManager
         }
     }
 
+    public void BroadcastWithException(byte[] data, Client exceptionClient)
+    {
+        using (var iterator = clients.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                if (iterator.Current.Value != exceptionClient)
+                    connection.Send(data, iterator.Current.Value.ipEndPoint);
+            }
+        }
+    }
+
     public void SetLastRecivedPingTime(DateTime currentTime, Client client)
     {
         lastPingTimeForClient[client] = currentTime;
@@ -118,10 +130,17 @@ public class NetworkManagerServer : NetworkManager
 
                 break;
             case MessageType.Position:
-                NetVector3 pos = new NetVector3(data);
+                NetPosition pos = new NetPosition(data);
                 if (pos.CheckMessage(data))
                 {
-                    SendToClient(pos.Serialize(), ep);
+                    if (spawnedPlayers.ContainsKey(ipToId[ep]))
+                    {
+                        spawnedPlayers[pos.GetData().Item2].transform.position = pos.GetData().Item3;
+                        playersInMatch[pos.GetData().Item2].SetPosition(pos.GetData().Item3);
+                        BroadcastWithException(pos.Serialize(),clients[ipToId[ep]]);
+                    }
+
+
                     Debug.Log(nameof(MessageType.Position) + ": The message is ok");
                 }
                 else
@@ -147,8 +166,8 @@ public class NetworkManagerServer : NetworkManager
 
                     foreach (Player player in playersInMatch)
                     {
-                        if (!spawnedPlayers.ContainsValue(player.playerID))
-                            spawnedPlayers.Add(SpawnSidePlayer(), player.playerID);
+                        if (!spawnedPlayers.ContainsKey(player.playerID))
+                            spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
                     }
 
                     Debug.Log(nameof(MessageType.ClientToServerHS) + ": The message is ok");

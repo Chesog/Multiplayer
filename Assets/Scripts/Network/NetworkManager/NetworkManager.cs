@@ -15,7 +15,7 @@ public class NetworkManager : MonoBehaviour , IReceiveData
     protected Action<byte[], IPEndPoint> OnReceiveEvent;
     protected UdpConnection connection;
     protected List<Player> playersInMatch = new List<Player>();
-    protected Dictionary<GameObject, int> spawnedPlayers = new Dictionary<GameObject, int>();
+    protected Dictionary<int,GameObject> spawnedPlayers = new Dictionary<int, GameObject>();
     
     protected void OnDispatchNetCon(string obj)
     {

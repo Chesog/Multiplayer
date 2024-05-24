@@ -9,6 +9,7 @@ public class InputReader : MonoBehaviour
     private ServiceLocator _serviceLocator;
     private NetworkManagerClient _client;
     private ChatScreen _chatScreen;
+    public Action<Vector3> OnPlayerMove;
 
 
     void OnEnable()
@@ -23,9 +24,9 @@ public class InputReader : MonoBehaviour
     
     public void OnMove(InputValue input)
     {
-        Vector3 aux = input.Get<Vector3>();
-        NetVector3 movement = new NetVector3(aux);
-        _client.SendToServer(movement.Serialize());
+        OnPlayerMove?.Invoke(input.Get<Vector3>());
+        //NetVector3 movement = new NetVector3(aux);
+        //_client.SendToServer(movement.Serialize());
     }
 
     public void OnOpenChat(InputValue input)
