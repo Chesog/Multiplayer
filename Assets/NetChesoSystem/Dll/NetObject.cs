@@ -1,5 +1,5 @@
 
-namespace NetChesoNetwork
+namespace NetChesoSystem.Dll
 {
     public class NetObject
     {

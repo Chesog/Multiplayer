@@ -1,4 +1,4 @@
-namespace NetChesoNetwork
+namespace NetChesoSystem.Dll
 {
     public interface INetObject
     {
