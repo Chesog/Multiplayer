@@ -1,9 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Net_Ch_System;
 
 public class NetworkManagerClient : NetworkManager
 {
@@ -166,11 +165,11 @@ public class NetworkManagerClient : NetworkManager
                     {
                         if (player.playerID != clientId && !spawnedPlayers.ContainsKey(player.playerID))
                         {
-                            spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
+                            //spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
                         }
                         else if (player.playerID == clientId && !spawnedPlayers.ContainsKey(player.playerID))
                         {
-                            spawnedPlayers.Add(player.playerID,SpawnMainPlayer());
+                            //spawnedPlayers.Add(player.playerID,SpawnMainPlayer());
                         }
                     }
 
@@ -185,17 +184,17 @@ public class NetworkManagerClient : NetworkManager
         }
     }
 
-    private GameObject SpawnMainPlayer()
-    {
-        _serviceLocator.Get(out NetworkScreen networkScreen);
-        
-        Vector2 rng = Random.insideUnitSphere * 5.0f;
-        networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
-        _serviceLocator.Get(out CameraController cameraController);
-        cameraController.InitCamera(networkScreen.mainPlayerRep.transform);
-        clientPlayer.playerPos = networkScreen.mainPlayerRep.transform.position;
-        return Instantiate(networkScreen.mainPlayerRep, networkScreen.playerSpawn);
-    }
+    //private GameObject SpawnMainPlayer()
+    //{
+    //    _serviceLocator.Get(out NetworkScreen networkScreen);
+    //    
+    //    Vector2 rng = Random.insideUnitSphere * 5.0f;
+    //    networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
+    //    _serviceLocator.Get(out CameraController cameraController);
+    //    cameraController.InitCamera(networkScreen.mainPlayerRep.transform);
+    //    clientPlayer.playerPos = networkScreen.mainPlayerRep.transform.position;
+    //    return Instantiate(networkScreen.mainPlayerRep, networkScreen.playerSpawn);
+    //}
 
     public override void Update()
     {

@@ -34,7 +34,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int port = System.Convert.ToInt32(portInputField.text);
         string playerName = nameInputField.text;
 
-        _networkClient = _serviceLocator.gameObject.AddComponent<NetworkManagerClient>();
+        //_networkClient = _serviceLocator.gameObject.AddComponent<NetworkManagerClient>();
         
         _networkClient.StartClient(ipAddress, port,playerName);
         _serviceLocator.Get(out NetworkManagerClient client);
@@ -51,7 +51,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int port = Convert.ToInt32(portInputField.text);
         IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
         
-        _networkServer = _serviceLocator.gameObject.AddComponent<NetworkManagerServer>();
+        //_networkServer = _serviceLocator.gameObject.AddComponent<NetworkManagerServer>();
         
         _networkServer.StartServer(port);
         _serviceLocator.Get(out NetworkManagerServer server);

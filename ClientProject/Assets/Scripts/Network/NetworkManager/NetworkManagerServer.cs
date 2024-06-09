@@ -16,7 +16,7 @@ public class NetworkManagerServer : NetworkManager
         _serviceLocator = ServiceLocator.Global;
 
         this.port = port;
-        connection = new UdpConnection(port, this);
+        connection = new UdpConnection(this.port, this);
 
         IsServer = true;
 
@@ -166,8 +166,8 @@ public class NetworkManagerServer : NetworkManager
 
                     foreach (Player player in playersInMatch)
                     {
-                        if (!spawnedPlayers.ContainsKey(player.playerID))
-                            spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
+                        //if (!spawnedPlayers.ContainsKey(player.playerID))
+                            //spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
                     }
 
                     Debug.Log(nameof(MessageType.ClientToServerHS) + ": The message is ok");

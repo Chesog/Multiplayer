@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
-
-namespace Net_Ch_System
+﻿namespace Net_Ch_System
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Sockets;
+    
     public class UdpConnection
     {
         private struct DataReceived

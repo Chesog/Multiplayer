@@ -4,7 +4,7 @@ using System.Net;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class NetworkManager : MonoBehaviour , IReceiveData
+public class NetworkManager : IReceiveData
 {
     public int port { get; protected set; }
     public IPAddress ipAddress { get; protected set; }
@@ -43,13 +43,13 @@ public class NetworkManager : MonoBehaviour , IReceiveData
             OnReceiveEvent.Invoke(data, ip);
     }
 
-    protected GameObject SpawnSidePlayer()
-    {
-        _serviceLocator.Get(out NetworkScreen networkScreen);
-        Vector2 rng = Random.insideUnitSphere * 5.0f;
-        networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
-        return Instantiate(networkScreen.sidePlayerRep, networkScreen.playerSpawn);
-    }
+   // protected GameObject SpawnSidePlayer()
+   // {
+   //     _serviceLocator.Get(out NetworkScreen networkScreen);
+   //     Vector2 rng = Random.insideUnitSphere * 5.0f;
+   //     networkScreen.playerSpawn.position = new Vector3(rng.x, 0.0f, rng.y);
+   //     return Instantiate(networkScreen.sidePlayerRep, networkScreen.playerSpawn);
+   // }
 
     public List<Player> GetCurrentPlayers() { return playersInMatch; }
     
