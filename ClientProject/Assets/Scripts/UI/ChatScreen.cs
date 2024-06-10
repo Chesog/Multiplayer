@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Net_Ch_System;
 
 public class ChatScreen : MonoBehaviour
 {
@@ -8,7 +9,6 @@ public class ChatScreen : MonoBehaviour
     public InputField inputMessage;
     
     private ServiceLocator _serviceLocator;
-    private NetworkManagerServer _networkManagerServer = new NetworkManagerServer();
     private NetworkManagerClient _networkManagerClient = new NetworkManagerClient();
     private float hideScreenTime = 10.0f;
 
@@ -21,18 +21,9 @@ public class ChatScreen : MonoBehaviour
 
     public void InitChatScreen()
     {
-        if (NetworkManager.IsServer)
-        {
-            _serviceLocator.Get(out NetworkManagerServer server);
-            if (server != null)
-                _networkManagerServer = server;
-        }
-        else
-        {
-            _serviceLocator.Get(out NetworkManagerClient clietn);
-            if (clietn != null)
-                _networkManagerClient = clietn;
-        }
+       // _serviceLocator.Get(out NetworkManagerClient clietn);
+       // if (clietn != null)
+       //     _networkManagerClient = clietn;
 
         inputMessage.onEndEdit.AddListener(OnEndEdit);
     }
@@ -67,16 +58,9 @@ public class ChatScreen : MonoBehaviour
         if (!string.IsNullOrEmpty(inputMessage.text))
         {
             NetConsole temp;
-            if (NetworkManager.IsServer)
-            {
-                temp = new NetConsole("Server : " + inputMessage.text);
-                _networkManagerServer.HandleServerMessage(temp.Serialize());
-            }
-            else
-            {
-                temp = new NetConsole(_networkManagerClient.playerName + " : " + inputMessage.text);
-                _networkManagerClient.SendToServer(temp.Serialize());
-            }
+            
+            temp = new NetConsole(_networkManagerClient.playerName + " : " + inputMessage.text);
+            _networkManagerClient.SendToServer(temp.Serialize());
 
 
             inputMessage.ActivateInputField();

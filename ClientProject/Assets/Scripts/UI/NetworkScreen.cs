@@ -17,7 +17,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     
     private ServiceLocator _serviceLocator;
     private CameraController _camController;
-    private NetworkManagerServer _networkServer;
     private NetworkManagerClient _networkClient;
 
     protected void Start()
@@ -35,10 +34,12 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         string playerName = nameInputField.text;
 
         //_networkClient = _serviceLocator.gameObject.AddComponent<NetworkManagerClient>();
+
+        _networkClient = new NetworkManagerClient();
         
         _networkClient.StartClient(ipAddress, port,playerName);
-        _serviceLocator.Get(out NetworkManagerClient client);
-        _networkClient = client;
+        //_serviceLocator.Get(out NetworkManagerClient client);
+        //_networkClient = client;
         
         _serviceLocator.Get(out ChatScreen chatScreen);
         chatScreen.InitChatScreen();
@@ -53,9 +54,9 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         
         //_networkServer = _serviceLocator.gameObject.AddComponent<NetworkManagerServer>();
         
-        _networkServer.StartServer(port);
-        _serviceLocator.Get(out NetworkManagerServer server);
-        _networkServer = server;
+        //_networkServer.StartServer(port);
+        //_serviceLocator.Get(out NetworkManagerServer server);
+        //_networkServer = server;
         
         _serviceLocator.Get(out ChatScreen chatScreen);
         chatScreen.InitChatScreen();

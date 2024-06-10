@@ -1,7 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Net_Ch_System;
 
 public class Player_Movement : MonoBehaviour
 {
@@ -39,7 +37,7 @@ public class Player_Movement : MonoBehaviour
         message.Item2 = _client.clientId;
         message.Item3 = transform.position;
         
-        NetPosition movement = new NetPosition(message);
-        _client.SendToServer(movement.Serialize());
+        //NetPosition movement = new NetPosition(message);
+        //_client.SendToServer(movement.Serialize());
     }
 }

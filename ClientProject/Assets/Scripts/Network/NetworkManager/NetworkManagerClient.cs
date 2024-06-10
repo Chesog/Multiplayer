@@ -14,8 +14,8 @@ public class NetworkManagerClient : NetworkManager
 
     public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
     {
-        _serviceLocator = ServiceLocator.Global;
-        _serviceLocator.Register<NetworkManagerClient>(GetType(), this);
+        //_serviceLocator = ServiceLocator.Global;
+        //_serviceLocator.Register<NetworkManagerClient>(GetType(), this);
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
 
@@ -24,14 +24,29 @@ public class NetworkManagerClient : NetworkManager
         playerName = name;
 
         connection = new UdpConnection(ip, port, this);
-
         clientPlayer = new Player(name, -7);
-        NetClientToServerHS nacho = new NetClientToServerHS(clientPlayer);
-        SendToServer(nacho.Serialize());
+        
+        ConectToMatchMaker();
+    }
+
+    public void ConectToMatchMaker()
+    {
+        NetClientToMatchMakerHS clientToMatchMakerHs = new NetClientToMatchMakerHS();
+        SendToServer(clientToMatchMakerHs.Serialize());
+        Debug.Log("Connecting To MatchMaker");
+    }
+
+    public void ConectToServer(int port)
+    {
+        this.port = port;
+        connection = new UdpConnection(ipAddress, port, this);
+        NetClientToServerHS currentPlayer = new NetClientToServerHS(clientPlayer);
+        SendToServer(currentPlayer.Serialize());
 
         NetPing ping = new NetPing();
         SendToServer(ping.Serialize());
     }
+
 
     private void OnDisable()
     {
@@ -73,6 +88,7 @@ public class NetworkManagerClient : NetworkManager
     public void HandleMessage(byte[] message)
     {
         MessageType temp = (MessageType)BitConverter.ToInt32(message, 0);
+        Debug.Log(temp);
         switch (temp)
         {
             case MessageType.Console:
@@ -80,6 +96,7 @@ public class NetworkManagerClient : NetworkManager
                 if (con.CheckMessage(message))
                 {
                     NetConsole.OnDispatch?.Invoke(con.GetData());
+                    Debug.Log(con.GetData());
                     Debug.Log(nameof(MessageType.Console) + ": The message is ok");
                 }
                 else
@@ -92,12 +109,13 @@ public class NetworkManagerClient : NetworkManager
                 {
                     if (pos.GetData().Item1 == (int)ObjectType.Player)
                     {
-                        if (spawnedPlayers.ContainsKey(pos.GetData().Item2))
-                        {
-                            spawnedPlayers[pos.GetData().Item2].transform.position = pos.GetData().Item3;
-                            playersInMatch[pos.GetData().Item2].SetPosition(pos.GetData().Item3);
-                        }
+                        //if (spawnedPlayers.ContainsKey(pos.GetData().Item2))
+                        //{
+                        //    //spawnedPlayers[pos.GetData().Item2].transform.position = pos.GetData().Item3;
+                        //    playersInMatch[pos.GetData().Item2].SetPosition(pos.GetData().Item3);
+                        //}
                     }
+
                     Debug.Log(nameof(MessageType.Position) + ": The message is ok");
                 }
                 else
@@ -159,18 +177,18 @@ public class NetworkManagerClient : NetworkManager
                 NetPlayerList newList = new NetPlayerList(message);
                 if (newList.CheckMessage(message))
                 {
-                    _serviceLocator.Get(out NetworkManagerClient client);
+                    //_serviceLocator.Get(out NetworkManagerClient client);
                     playersInMatch = newList.GetData();
                     foreach (Player player in playersInMatch)
                     {
-                        if (player.playerID != clientId && !spawnedPlayers.ContainsKey(player.playerID))
-                        {
-                            //spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
-                        }
-                        else if (player.playerID == clientId && !spawnedPlayers.ContainsKey(player.playerID))
-                        {
-                            //spawnedPlayers.Add(player.playerID,SpawnMainPlayer());
-                        }
+                       // if (player.playerID != clientId && !spawnedPlayers.ContainsKey(player.playerID))
+                       // {
+                       //     //spawnedPlayers.Add(player.playerID,SpawnSidePlayer());
+                       // }
+                       // else if (player.playerID == clientId && !spawnedPlayers.ContainsKey(player.playerID))
+                       // {
+                       //     //spawnedPlayers.Add(player.playerID,SpawnMainPlayer());
+                       // }
                     }
 
                     Debug.Log(nameof(MessageType.PlayerList) + ": The message is ok");
@@ -180,6 +198,13 @@ public class NetworkManagerClient : NetworkManager
                     Debug.Log(nameof(MessageType.PlayerList) + ": The message is corrupt");
                 }
 
+                break;
+            case MessageType.MatchMakerToClientHS:
+                NetMatchMakerToClientHS MM2CHS = new NetMatchMakerToClientHS();
+                if (MM2CHS.CheckMessage(message))
+                    Debug.Log(nameof(MessageType.MatchMakerToClientHS) + ": The message is ok");
+                else
+                    Debug.Log(nameof(MessageType.MatchMakerToClientHS) + ": The message is corrupt");
                 break;
         }
     }
