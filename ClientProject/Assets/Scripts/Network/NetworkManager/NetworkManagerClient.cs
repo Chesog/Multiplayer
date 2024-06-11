@@ -11,6 +11,7 @@ public class NetworkManagerClient : NetworkManager
     public string playerName; //  cliente
     private DateTime lastTimeReceivedPing = DateTime.UtcNow;
     private Player clientPlayer;
+    private int _matchMakerPort = 1441;
 
     public void StartClient(IPAddress ip, int port, string name) // cliente pero con mensaje para el servidor
     {
@@ -19,7 +20,8 @@ public class NetworkManagerClient : NetworkManager
         NetConsole.OnDispatch += OnDispatchNetCon;
         NetServerToClientHS.OnDispatch += OnDispatchNetS2C;
 
-        this.port = port;
+        //this.port = port;
+        this.port = _matchMakerPort;
         this.ipAddress = ip;
         playerName = name;
 
@@ -27,6 +29,7 @@ public class NetworkManagerClient : NetworkManager
         clientPlayer = new Player(name, -7);
         
         ConectToMatchMaker();
+        //ConectToServer(_matchMakerPort);
     }
 
     public void ConectToMatchMaker()
@@ -38,6 +41,7 @@ public class NetworkManagerClient : NetworkManager
 
     public void ConectToServer(int port)
     {
+        connection.Close();
         this.port = port;
         connection = new UdpConnection(ipAddress, port, this);
         NetClientToServerHS currentPlayer = new NetClientToServerHS(clientPlayer);
@@ -46,7 +50,6 @@ public class NetworkManagerClient : NetworkManager
         NetPing ping = new NetPing();
         SendToServer(ping.Serialize());
     }
-
 
     private void OnDisable()
     {

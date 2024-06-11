@@ -14,7 +14,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public GameObject sidePlayerRep;
     public Transform playerSpawn;
     public Transform serverCameraPos;
-    
+
     private ServiceLocator _serviceLocator;
     private CameraController _camController;
     private NetworkManagerClient _networkClient;
@@ -26,7 +26,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         connectBtn.onClick.AddListener(OnConnectBtnClick);
         startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
-    
+
     void OnConnectBtnClick()
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
@@ -36,14 +36,14 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         //_networkClient = _serviceLocator.gameObject.AddComponent<NetworkManagerClient>();
 
         _networkClient = new NetworkManagerClient();
-        
-        _networkClient.StartClient(ipAddress, port,playerName);
+
+        _networkClient.StartClient(ipAddress, port, playerName);
         //_serviceLocator.Get(out NetworkManagerClient client);
         //_networkClient = client;
-        
+
         _serviceLocator.Get(out ChatScreen chatScreen);
         chatScreen.InitChatScreen();
-        
+
         SwitchToChatScreen();
     }
 
@@ -51,16 +51,16 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     {
         int port = Convert.ToInt32(portInputField.text);
         IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
-        
+
         //_networkServer = _serviceLocator.gameObject.AddComponent<NetworkManagerServer>();
-        
+
         //_networkServer.StartServer(port);
         //_serviceLocator.Get(out NetworkManagerServer server);
         //_networkServer = server;
-        
+
         _serviceLocator.Get(out ChatScreen chatScreen);
         chatScreen.InitChatScreen();
-        
+
         SwitchToChatScreen();
         _serviceLocator.Get(out CameraController cameraController);
         cameraController.InitCamera(serverCameraPos);
@@ -69,7 +69,13 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void SwitchToChatScreen()
     {
         _serviceLocator.Get(out ChatScreen chatScreen);
-        chatScreen.gameObject.SetActive(false);
-        this.gameObject.SetActive(false);
+        //chatScreen.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (_networkClient != null)
+            _networkClient.Update();
     }
 }

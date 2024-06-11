@@ -8,36 +8,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68665fd1-2900-4717-846d-46cb742429f0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/.idea/.idea.Net_Ch_System/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/.idea/.idea.Net_Ch_System/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/.idea/.idea.Net_Ch_System/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/BaseMessage.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/Client.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/MessageType.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/ObjectType.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Net_ChServer/NetworkManagerServer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../../ClientProject/Assets/Scenes/SampleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/BaseMessage.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/BaseMessage.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/NetworkManager/NetworkManager.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/NetworkManager/NetworkManager.cs.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/NetworkManager/NetworkManagerClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/NetworkManager/NetworkManagerClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/NetworkManager/NetworkManagerServer.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/NetworkManager/NetworkManagerServer.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/UdpConnection.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Network/UdpConnection.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Player/Player_Movement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/Player/Player_Movement.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/UI/ChatScreen.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/UI/ChatScreen.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/UI/NetworkScreen.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../ClientProject/Assets/Scripts/UI/NetworkScreen.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../ClientProject/UserSettings/Layouts/default-2022.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/../../ClientProject/UserSettings/Layouts/default-2022.dwlt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/UdpConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/UdpConnection.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/bin/Debug/netstandard2.1/Net_Ch_System.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../../LibraryProject/Net_Ch_System/bin/Debug/netstandard2.1/Net_Ch_System.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../MatchMakerProject/Lib/Net_Ch_System.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../../MatchMakerProject/Lib/Net_Ch_System.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/MatchMaker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/MatchMaker.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/bin/Debug/net7.0/Net_Ch_MatchMaker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/bin/Debug/net7.0/Net_Ch_MatchMaker.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/bin/Debug/net7.0/Net_Ch_System.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../../MatchMakerProject/Net_Ch_MatchMaker/Net_Ch_MatchMaker/bin/Debug/net7.0/Net_Ch_System.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Lib/Net_Ch_System.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../Lib/Net_Ch_System.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Net_ChServer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Net_ChServer/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Net_ChServer/NetworkManagerServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Net_ChServer/NetworkManagerServer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Net_ChServer/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Net_ChServer/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Net_ChServer/bin/Debug/net7.0/Net_ChServer.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Net_ChServer/bin/Debug/net7.0/Net_ChServer.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Net_ChServer/bin/Debug/net7.0/Net_Ch_System.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Net_ChServer/bin/Debug/net7.0/Net_Ch_System.dll" afterDir="false" />
@@ -111,6 +92,7 @@
       <updated>1717913497380</updated>
       <workItem from="1717913498437" duration="711000" />
       <workItem from="1717973442662" duration="5127000" />
+      <workItem from="1718086172642" duration="490000" />
     </task>
     <servers />
   </component>

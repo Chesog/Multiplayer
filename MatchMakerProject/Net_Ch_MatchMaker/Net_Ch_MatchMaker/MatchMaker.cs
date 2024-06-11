@@ -24,6 +24,12 @@ namespace Net_Ch_MatchMaker
             //Process.Start(,)
         }
 
+        public void CloseMatchMaker()
+        {
+            // Todo : Mandarle un mensaje a cada cliente para cerrar la conexion
+            connection.Close();
+        }
+
         public void HandleServerMessage(byte[] data, IPEndPoint ep = null)
         {
             MessageType receivedMessage = (MessageType)BitConverter.ToInt32(data, 0);
@@ -36,24 +42,19 @@ namespace Net_Ch_MatchMaker
                     NetClientToMatchMakerHS C2MMHS = new NetClientToMatchMakerHS();
                     if (C2MMHS.CheckMessage(data))
                     {
-                        NetConsole console = new NetConsole("Hola Cliente desde el server");
-                        NetMatchMakerToClientHS MM2CHS = new NetMatchMakerToClientHS();
-                        SendToClient(console.Serialize(),ep);
-                        Console.WriteLine(nameof(MessageType.ClientToMatchMakerHS) + ": The message is ok");
-                       // if (!ipToId.ContainsKey(ep))
-                       // {
-                       //     ipToId[ep] = conectionID;
-                       //     float realtimeSinceStartup = 0.0f;
-                       //
-                       //     clients.Add(conectionID, new Client(ep, conectionID,realtimeSinceStartup));
-                       //     
-                       //     NetMatchMakerToClientHS MM2CHS = new NetMatchMakerToClientHS();
-                       //     SendToClient(MM2CHS.Serialize(),ep);
-                       //     //Broadcast(MM2CHS.Serialize());
-                       //     Console.WriteLine(nameof(MessageType.ClientToMatchMakerHS) + ": The message is ok");
-                       //
-                       //     conectionID++;
-                       // }
+                       if (!ipToId.ContainsKey(ep))
+                       {
+                           ipToId[ep] = conectionID;
+                           float realtimeSinceStartup = 0.0f;
+                       
+                           clients.Add(conectionID, new Client(ep, conectionID,realtimeSinceStartup));
+                           
+                           NetMatchMakerToClientHS MM2CHS = new NetMatchMakerToClientHS();
+                           SendToClient(MM2CHS.Serialize(),ep);
+                           Console.WriteLine(nameof(MessageType.ClientToMatchMakerHS) + ": The message is ok");
+                       
+                           conectionID++;
+                       }
                     }
                     else
                     {
@@ -101,13 +102,12 @@ namespace Net_Ch_MatchMaker
         
         public virtual void Update()
         {
+            Console.SetCursorPosition(0,0);
+            Console.WriteLine("Current clients Count : " + clients.Count);
+            
             // Flush the data in main thread
             if (connection != null)
                 connection.FlushReceiveData();
-            
-           
-            Console.SetCursorPosition(0,0);
-            Console.WriteLine("Current clients Count : " + clients.Count);
         }
     }
 }

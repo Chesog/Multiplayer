@@ -8,12 +8,10 @@
         public static void Main(string[] args)
         {
             Console.WriteLine("Hola Server Mundo");
-            Console.ReadKey();
+            //Console.ReadKey();
 
-            int port = int.Parse(args.GetValue(0).ToString());
-            _networkManagerServer.StartServer(port);
-
-            Console.WriteLine(port);
+            //int port = int.Parse(args.GetValue(0).ToString());
+            _networkManagerServer.StartServer(1441);
             
             while (_networkManagerServer.IsServerRuning)
             {

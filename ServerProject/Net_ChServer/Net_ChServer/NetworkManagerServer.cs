@@ -36,8 +36,8 @@ namespace Net_ChServer
                 playersInMatch.Add(lean);
                 clientId++;
 
-                Process.Start(" ");
-                ProcessStartInfo asd;
+                //Process.Start(" ");
+                //ProcessStartInfo asd;
             }
 
             foreach (Player player in playersInMatch)

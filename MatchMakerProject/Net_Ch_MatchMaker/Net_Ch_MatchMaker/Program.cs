@@ -14,6 +14,7 @@ namespace Net_Ch_MatchMaker
             {
                 _matchMaker.Update();
             }
+            _matchMaker.CloseMatchMaker();
             //string serverPath = Path.GetFullPath("$(SolutionDir)..\\..\\ServerProject\\Net_ChServer\\Net_ChServer\\bin\\Debug\\Net_ChServer.exe");
             ////string serverPath = Directory.GetParent(Directory.GetCurrentDirectory());
             //

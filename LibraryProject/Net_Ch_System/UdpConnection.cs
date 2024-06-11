@@ -58,23 +58,24 @@
 
         void OnReceive(IAsyncResult ar)
         {
+            DataReceived dataReceived = new DataReceived();
             try
             {
-                DataReceived dataReceived = new DataReceived();
                 dataReceived.data = connection.EndReceive(ar, ref dataReceived.ipEndPoint);
-
-                lock (handler)
-                {
-                    dataReceivedQueue.Enqueue(dataReceived);
-                }
             }
             catch (SocketException e)
             {
                 // This happens when a client disconnects, as we fail to send to that port.
                 Console.WriteLine("Error : [UdpConnection] " + e.Message);
             }
-
-            connection.BeginReceive(OnReceive, null);
+            finally
+            {
+                lock (handler)
+                {
+                    dataReceivedQueue.Enqueue(dataReceived);
+                }
+                connection.BeginReceive(OnReceive, null);
+            }
         }
 
         public void Send(byte[] data)
